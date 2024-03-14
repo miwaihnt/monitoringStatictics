@@ -1,6 +1,8 @@
 package com.example.myapplication2
 
 import android.util.Log
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.layout.Row
 import android.Manifest
 import android.app.AppOpsManager
 import android.app.usage.UsageStats
@@ -13,6 +15,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -21,6 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.myapplication2.ui.theme.MyApplication2Theme
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.Icon
 
 
 
@@ -36,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    HomeIcon()
                     val permissionResult = checkReadStatsPermission(this)
                     Log.d("PermissionCheck", "Result: $permissionResult")
                     val usageStatsClass = UsageStatsClass(this)
@@ -47,14 +54,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
 }
 
 fun checkReadStatsPermission(context: Context): Boolean {
@@ -90,10 +89,4 @@ fun checkReadStatsPermission(context: Context): Boolean {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MyApplication2Theme {
-        Greeting("Android")
-    }
-}
+
