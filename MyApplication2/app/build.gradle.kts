@@ -76,6 +76,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.0.0")
     implementation ("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-auth:22.3.1")
 
 
 }
