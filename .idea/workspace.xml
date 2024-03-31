@@ -39,6 +39,19 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="selectedUrlAndAccountId">
+      <UrlAndAccount>
+        <option name="accountId" value="8df8bee0-f7d0-470b-84ae-c38c0c8a5f47" />
+        <option name="url" value="https://github.com/LewisCarolAlice/monitoringStatictics.git" />
+      </UrlAndAccount>
+    </option>
+  </component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -55,7 +68,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "com.google.services.firebase.aqiPopupShown": "true",
-    "last_opened_file_path": "/Users/wataru/AndroidStudioProjects/preUSM5/app/src/main/res/drawable",
+    "last_opened_file_path": "/Users/wataru/github/monitoringStatictics/preUSM5",
     "settings.editor.selected.configurable": "AndroidSdkUpdater"
   }
 }]]></component>
@@ -67,7 +80,7 @@
       <recent name="$PROJECT_DIR$/app/src/main/java/com/websarva/wings/android/preusm5" />
     </key>
   </component>
-  <component name="RunManager" selected="Compose Preview.NavigationPreview">
+  <component name="RunManager" selected="Android App.app">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App">
       <module name="preUSM5.app.main" />
       <option name="DEPLOY" value="true" />
@@ -131,9 +144,7 @@
       <option name="ACTIVITY_CLASS" value="" />
       <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
       <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
-      <method v="2">
-        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-      </method>
+      <method v="2" />
     </configuration>
     <configuration name="NavigationPreview" type="ComposePreviewRunConfiguration" singleton="false" temporary="true">
       <module name="preUSM5.app.main" />
@@ -199,9 +210,7 @@
       <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="true" />
       <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
       <compose-preview-run-configuration composable-fqn="com.websarva.wings.android.preusm5.SearchBarScreenKt.NavigationPreview" />
-      <method v="2">
-        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-      </method>
+      <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
