@@ -1,21 +1,26 @@
 package com.example.myapplication2
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.IconButton
-
+import androidx.compose.runtime.remember
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import com.google.firebase.auth.FirebaseAuth
 
 val iconList = listOf (
     Icons.Default.Add,
@@ -69,8 +74,123 @@ val iconList = listOf (
     Icons.Default.Warning,
 )
 
+//ユーザ登録
+fun onRegisterClicked(email:String,password:String,userRegistration:UserRegistration) {
+    userRegistration.registration(email,password)
+}
+
+//ログイン認証
+//エラー処理でポップアウトさせたい
+//なんかうまく認証されていない
+fun performLogin(email: String,password: String,auth: FirebaseAuth,navController: NavController){
+    FirebaseAuth.getInstance().signInWithEmailAndPassword(email,password)
+        .addOnCompleteListener{task ->
+            if(task.isSuccessful){
+                navController.navigate("HomeIcon")
+                Log.d("performLogin","Succcess")
+            } else {
+                Log.d("performLogin","Failed")
+                val errorCode = task.exception?.message
+                Log.e("performLogin","ErrorCode: $errorCode")
+            }
+        }
+}
+
+//メールアドレス登録画面
 @Composable
-fun HomeIcon(){
+fun RegistrationScreen(
+    navController:NavController,
+    userRegistration: UserRegistration
+)
+{
+    Log.d("RegistrationScreen","RegistrationScreen Composable is called")
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    )
+    {
+        // Email入力フィールド
+        TextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            modifier = Modifier.padding(16.dp)
+        )
+
+        // Password入力フィールド
+        TextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            modifier = Modifier.padding(16.dp)
+        )
+        Button(
+            onClick = {
+                onRegisterClicked(email, password,userRegistration)
+                navController.navigate("Login")
+                      },
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("Register")
+        }
+    }
+}
+
+
+// ログイン画面
+//　認証機能の実装
+@Composable
+fun Login(
+    navController: NavController,
+    auth: FirebaseAuth
+) {
+
+    var email by remember { mutableStateOf("") }
+    var password by remember{ mutableStateOf("") }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ){
+        TextField(
+            value = email,
+            onValueChange = {email = it},
+            label = { Text("Email")},
+            modifier = Modifier.padding(16.dp)
+        )
+
+        TextField(
+            value = password,
+            onValueChange = { password = it},
+            label = {Text("password")},
+            modifier = Modifier.padding(16.dp)
+        )
+
+        Button(
+            onClick = {
+                performLogin(email,password,auth,navController)},
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(text = "Login")
+        }
+        Button(
+            onClick = {
+                      navController.navigate("RegistrationScreen")},
+            modifier = Modifier.padding(16.dp)
+            ) {
+            Text("新規登録")
+        }
+    }
+}
+
+
+//ホーム画面（作成中）
+@Composable
+fun HomeIcon(navController: NavController){
     Row (
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement =  Arrangement.SpaceEvenly,
@@ -107,29 +227,4 @@ fun HomeIcon(){
 }
 
 
-//@Composable
-//fun HomeIcon(){
-//    Row (
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(vertical = 16.dp),
-//        horizontalArrangement =  Arrangement.SpaceBetween,
-//        verticalAlignment = Alignment.Bottom
-//    ) {
-//        // 画面の左端から1/4の位置にアイコンを配置
-//        Spacer(modifier = Modifier.weight(1f))
-//        IconButton(onClick = {
-//            println("Home Clicked!")
-//        }) {
-//            Icon(imageVector = Icons.Default.Home, contentDescription = "Home")
-//        }
-//
-//        // 画面の右端から1/4の位置にアイコンを配置
-//        IconButton(onClick = {
-//            println("Settings Clicked!")
-//        }) {
-//            Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
-//        }
-//        Spacer(modifier = Modifier.weight(1f))
-//    }
-//}
+
