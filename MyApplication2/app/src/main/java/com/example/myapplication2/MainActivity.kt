@@ -16,12 +16,15 @@ private const val TAG = "MainActivity"
 class MainActivity : ComponentActivity() {
     private lateinit var dbConnection: dbConnection
     private lateinit var userRegistration: UserRegistration
+    private lateinit var dbInfoGet: dbInfoGet
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        dbConnection = dbConnection(FirebaseFirestore.getInstance())
-        userRegistration = UserRegistration(FirebaseFirestore.getInstance())
+        val FirebaseFirestore = FirebaseFirestore.getInstance()
+        dbConnection = dbConnection(FirebaseFirestore)
+        userRegistration = UserRegistration(FirebaseFirestore)
+        dbInfoGet = dbInfoGet(FirebaseFirestore)
         auth = FirebaseAuth.getInstance()
         setContent {
             MyApplication2Theme {
@@ -35,7 +38,7 @@ class MainActivity : ComponentActivity() {
 //                    usageStatsClass.readOneDayUsageStats()
 //                    val usageStats = usageStatsClass.readOneDayUsageStats()
 //                    dbConnection.uploadusestate(usageStats)
-                    DisplayNav(userRegistration,auth)
+                    DisplayNav(userRegistration,auth,dbInfoGet)
                     Log.d(TAG,"OnCreate Call")
 
                 }

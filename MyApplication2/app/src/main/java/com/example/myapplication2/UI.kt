@@ -19,7 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
 import com.google.firebase.auth.FirebaseAuth
 
 val iconList = listOf (
@@ -75,13 +74,18 @@ val iconList = listOf (
 )
 
 //ユーザ登録
-fun onRegisterClicked(email:String,password:String,userRegistration:UserRegistration) {
-    userRegistration.registration(email,password)
+fun onRegisterClicked(
+    email:String,
+    password:String,
+    userRegistration:UserRegistration,
+    auth: FirebaseAuth,
+    userName:String
+) {
+    userRegistration.registration(email,password,auth,userName)
 }
 
 //ログイン認証
-//エラー処理でポップアウトさせたい
-//なんかうまく認証されていない
+
 fun performLogin(email: String,password: String,auth: FirebaseAuth,navController: NavController){
     FirebaseAuth.getInstance().signInWithEmailAndPassword(email,password)
         .addOnCompleteListener{task ->
@@ -100,10 +104,13 @@ fun performLogin(email: String,password: String,auth: FirebaseAuth,navController
 @Composable
 fun RegistrationScreen(
     navController:NavController,
-    userRegistration: UserRegistration
+    userRegistration: UserRegistration,
+    auth: FirebaseAuth
 )
 {
     Log.d("RegistrationScreen","RegistrationScreen Composable is called")
+
+    var userName by remember{ mutableStateOf(value = "") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -113,6 +120,15 @@ fun RegistrationScreen(
         verticalArrangement = Arrangement.Center
     )
     {
+
+        //ユーザ名入力フィールド
+        TextField(
+            value = userName,
+            onValueChange ={userName = it},
+            label = { Text(text = "ユーザ名")},
+            modifier = Modifier.padding(16.dp)
+        )
+
         // Email入力フィールド
         TextField(
             value = email,
@@ -126,14 +142,17 @@ fun RegistrationScreen(
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(16.dp)
         )
         Button(
             onClick = {
-                onRegisterClicked(email, password,userRegistration)
+                onRegisterClicked(email, password,userRegistration,auth,userName)
                 navController.navigate("Login")
                       },
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(16.dp)
+                .width(200.dp)
         ) {
             Text("Register")
         }
@@ -148,7 +167,6 @@ fun Login(
     navController: NavController,
     auth: FirebaseAuth
 ) {
-
     var email by remember { mutableStateOf("") }
     var password by remember{ mutableStateOf("") }
 
@@ -156,6 +174,7 @@ fun Login(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ){
+
         TextField(
             value = email,
             onValueChange = {email = it},
@@ -173,14 +192,18 @@ fun Login(
         Button(
             onClick = {
                 performLogin(email,password,auth,navController)},
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(16.dp)
+                .width(200.dp)
         ) {
             Text(text = "Login")
         }
         Button(
             onClick = {
                       navController.navigate("RegistrationScreen")},
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(8.dp)
+                .width(200.dp)
             ) {
             Text("新規登録")
         }
@@ -190,7 +213,21 @@ fun Login(
 
 //ホーム画面（作成中）
 @Composable
-fun HomeIcon(navController: NavController){
+fun HomeIcon(navController: NavController,dbInfoGet: dbInfoGet){
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+        ){
+        Button(onClick = {
+            //userInfoGet
+            dbInfoGet.getInfo()
+            Log.d("HomeIcon","calling HomeIconButton")
+         })
+        {
+            Text(text = "ユーザ情報取得")
+        }
+    }
+
     Row (
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement =  Arrangement.SpaceEvenly,
