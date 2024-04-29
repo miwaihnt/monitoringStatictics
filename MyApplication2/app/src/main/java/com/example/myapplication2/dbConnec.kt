@@ -30,7 +30,7 @@ class dbConnection(val db : FirebaseFirestore) {
              data[usageStat.packageName] = usageData
             }
             //データの格納
-            db.collection("userId")
+            db.collection("statistics")
                 .document("dailyStatus")
                 .set(data)
                 .addOnSuccessListener { Log.d(tag,"successfully upload!") }

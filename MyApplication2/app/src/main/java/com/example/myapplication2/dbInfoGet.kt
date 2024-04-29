@@ -11,8 +11,9 @@ import java.util.HashMap
 
 class dbInfoGet(val db : FirebaseFirestore) {
 
-        val TAG = "InfoGet"
+    val TAG = "InfoGet"
 
+    // コレクション配下取得
     fun getInfo() {
         Log.d(TAG,"Calling")
         db.collection("User")
@@ -26,5 +27,35 @@ class dbInfoGet(val db : FirebaseFirestore) {
             }
     }
 
+//     サブコレクション配下取得
+    fun subCollecInfoget() {
+    db.collection("User")
+        .get()
+        .addOnSuccessListener { querySnapshot ->
+            for (document in querySnapshot.documents) {
+                val userId = document.id
+                Log.d(TAG, "User ID : $userId")
+                val subCollectionRef = db.collection("User").document(userId)
+                    .collection("FollowData")
+                //　サブコレクションの参照を取得
+                subCollectionRef.get()
+                    .addOnSuccessListener { subCollectionSnapshot ->
+                        for (subDocument in subCollectionSnapshot.documents) {
+                            Log.d(TAG,"${subDocument.id} => ${subDocument.data}")
+                        }
+                    }
+                    .addOnFailureListener {Exception ->
+                        Log.e(TAG,"subCollectionGet Failed")
+                    }
 
+            }
+
+
+        }
+        .addOnFailureListener { Exception ->
+            Log.e(TAG,"subCollectionGet Start Failed")
+        }
+    }
 }
+
+

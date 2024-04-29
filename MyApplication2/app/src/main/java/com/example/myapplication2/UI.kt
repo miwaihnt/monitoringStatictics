@@ -217,16 +217,25 @@ fun HomeIcon(navController: NavController,dbInfoGet: dbInfoGet){
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-        ){
-        Button(onClick = {
-            //userInfoGet
-            dbInfoGet.getInfo()
-            Log.d("HomeIcon","calling HomeIconButton")
-         })
+        )
         {
-            Text(text = "ユーザ情報取得")
+            Button(onClick = {
+                //userInfoGet
+                dbInfoGet.getInfo()
+                Log.d("HomeIcon","calling HomeIconButton")
+             })
+            {
+                Text(text = "ユーザ情報取得")
+            }
+            Button(onClick = {
+                dbInfoGet.subCollecInfoget()
+                })
+            {
+                Text(text = "ユーザ情報取得（サブコレクション）")
+                Log.d("HomeIcon","calling HomeIconButton")
+            }
+
         }
-    }
 
     Row (
         modifier = Modifier.fillMaxWidth(),
