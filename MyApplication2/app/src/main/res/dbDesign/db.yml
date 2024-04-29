@@ -1,0 +1,51 @@
+# データモデリング
+[モデリング](https://qiita.com/samuraikun/items/dfe7d1081f62359b0dcd)
+ # Aユーザが友達のBユーザの統計情報にアクセスできる
+
+ #  (1) ユーザを登録できる（フォローできる）
+ #    - ユーザ同士で友達登録ができる
+ #      - フォロー機能を搭載する
+#       - フォローしたら、firestoreのユーザサブコレクションに登録する
+ #  (2) 統計情報を登録できる
+ #    - 統計情報の保時期間は1年である
+ #    - 統計情報を取得できる
+ #    - 特定のユーザの統計情報を取得できる
+ #    - 統計情報を使用してグラフ等に出力できる
+ #  (3) ユーザはフォローされているユーザの統計情報にアクセスできる
+ #    - ユーザAとユーザAの統計情報を紐付ける
+ #      - 統計情報にユーザの情報を持たせる
+ #    - フォローされているユーザの情報にアクセスできる
+
+
+
+users: #コレクション
+  userA: #ドキュメント
+    mail: XXX@XXX
+    password : XXX
+    Name: userA
+    UID : UID
+    Icon: URL
+    FollowData: #フォローデータをサブコレクションとして追加
+      follower:
+      following:
+
+
+
+statictics: #コレクション
+    userA: #ドキュメント
+      UID: UID
+      userName : XX
+      staticsDay: #日付ごとの統計情報をサブコレクションとして定義
+        XDay: {}
+        YDay: {}
+        ZDay: {}
+
+    userB: #ドキュメント
+      UID: UID
+      userName : XX
+      staticsDay: #日付ごとの統計情報をサブコレクションとして定義
+        XDay: {}
+        YDay: {}
+        ZDay: {}
+
+

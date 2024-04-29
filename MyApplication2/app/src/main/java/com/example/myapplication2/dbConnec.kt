@@ -5,24 +5,10 @@ import android.util.Log
 import android.app.usage.UsageStats
 import java.text.SimpleDateFormat
 import java.util.Locale
-import android.app.usage.UsageStatsManager
-import com.google.firebase.Timestamp
-import com.google.firebase.firestore.DocumentChange
-import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
-import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.firestore.MetadataChanges
-import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.ServerTimestamp
-import com.google.firebase.firestore.SetOptions
-import com.google.firebase.firestore.Source
-import java.util.ArrayList
 import java.util.Date
 import java.util.HashMap
-import java.util.concurrent.LinkedBlockingQueue
-import java.util.concurrent.ThreadPoolExecutor
-import java.util.concurrent.TimeUnit
+
 
 class dbConnection(val db : FirebaseFirestore) {
 
@@ -44,7 +30,7 @@ class dbConnection(val db : FirebaseFirestore) {
              data[usageStat.packageName] = usageData
             }
             //データの格納
-            db.collection("userId")
+            db.collection("statistics")
                 .document("dailyStatus")
                 .set(data)
                 .addOnSuccessListener { Log.d(tag,"successfully upload!") }
