@@ -8,12 +8,13 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
-fun DisplayNav(userRegistration: UserRegistration, auth: FirebaseAuth,dbInfoGet: dbInfoGet) {
+fun DisplayNav(userRegistration: UserRegistration, auth: FirebaseAuth, dbInfoGet: dbInfoGet,
+               dbAddFollowData: dbAddFollowData) {
 
     val navController = rememberNavController()
 
     NavHost(navController = navController,
-            startDestination = "Login" ) {
+        startDestination = "Login" ) {
 
         composable( route = "RegistrationScreen") {
             RegistrationScreen(navController = navController,userRegistration,auth)
@@ -22,8 +23,13 @@ fun DisplayNav(userRegistration: UserRegistration, auth: FirebaseAuth,dbInfoGet:
             Login(navController = navController,auth)
         }
         composable( route = "HomeIcon") {
-            HomeIcon(navController = navController,dbInfoGet)
+            HomeIcon(navController = navController,dbInfoGet,dbAddFollowData)
+        }
+        composable( route = "FriendSearchScreen") {
+            FriendSearchScreen(dbAddFollowData)
         }
     }
     Log.d("DisplayNav","Called DisplayNav")
 }
+
+

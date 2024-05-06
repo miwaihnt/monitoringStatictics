@@ -17,6 +17,8 @@ class MainActivity : ComponentActivity() {
     private lateinit var dbConnection: dbConnection
     private lateinit var userRegistration: UserRegistration
     private lateinit var dbInfoGet: dbInfoGet
+    private lateinit var dbAddFollowData: dbAddFollowData
+    private lateinit var dbgetDocumentId: dbgetDocumentId
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,6 +27,8 @@ class MainActivity : ComponentActivity() {
         dbConnection = dbConnection(FirebaseFirestore)
         userRegistration = UserRegistration(FirebaseFirestore)
         dbInfoGet = dbInfoGet(FirebaseFirestore)
+        dbAddFollowData = dbAddFollowData(FirebaseFirestore)
+        dbgetDocumentId = dbgetDocumentId(FirebaseFirestore)
         auth = FirebaseAuth.getInstance()
         setContent {
             MyApplication2Theme {
@@ -38,12 +42,13 @@ class MainActivity : ComponentActivity() {
 //                    usageStatsClass.readOneDayUsageStats()
 //                    val usageStats = usageStatsClass.readOneDayUsageStats()
 //                    dbConnection.uploadusestate(usageStats)
-                    DisplayNav(userRegistration,auth,dbInfoGet)
+                    DisplayNav(userRegistration,auth,dbInfoGet,dbAddFollowData)
                     Log.d(TAG,"OnCreate Call")
 
                 }
             }
         }
+
     }
 
     override fun onStart() {
