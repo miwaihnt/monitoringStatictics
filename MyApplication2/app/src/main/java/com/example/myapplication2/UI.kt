@@ -213,39 +213,39 @@ fun Login(
 
 //ホーム画面（作成中）
 @Composable
-fun HomeIcon(navController: NavController,dbInfoGet: dbInfoGet){
+fun HomeIcon(navController: NavController, dbInfoGet: dbInfoGet, dbAddFollowData: dbAddFollowData){
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-        )
+    ){
+        Button(onClick = {
+            //userInfoGet
+            dbInfoGet.getInfo()
+            Log.d("HomeIcon","calling HomeIconButton")
+        })
         {
-            Button(onClick = {
-                //userInfoGet
-                dbInfoGet.getInfo()
-                Log.d("HomeIcon","calling HomeIconButton")
-             })
-            {
-                Text(text = "ユーザ情報取得")
-            }
-            Button(onClick = {
-                dbInfoGet.subCollecInfoget()
-                })
-            {
-                Text(text = "ユーザ情報取得（サブコレクション）")
-                Log.d("HomeIcon","calling HomeIconButton")
-            }
-
+            Text(text = "ユーザ情報取得")
         }
+        Button(onClick = {
+            //friendSearchScreen
+            Log.d("FriendIcon","calling FriendIconButton")
+            navController.navigate("FriendSearchScreen")
+        })
+        {
+            Text(text = "友達を探す")
+        }
+
+    }
 
     Row (
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement =  Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.Bottom
-        ) {
+    ) {
         IconButton(
             onClick = {
-            println("Clicked!")
-        },
+                println("Clicked!")
+            },
             modifier = Modifier
                 .size(48.dp)
                 .padding(vertical = 8.dp)
@@ -258,8 +258,8 @@ fun HomeIcon(navController: NavController,dbInfoGet: dbInfoGet){
         }
         IconButton(
             onClick = {
-            println("Clicked!")
-        },
+                println("Clicked!")
+            },
             modifier = Modifier
                 .size(48.dp)
                 .padding(vertical = 8.dp)
@@ -267,10 +267,8 @@ fun HomeIcon(navController: NavController,dbInfoGet: dbInfoGet){
             Icon(
                 imageVector = Icons.Default.Settings,
                 contentDescription = "Add",
-                )
+            )
         }
     }
 }
-
-
 
