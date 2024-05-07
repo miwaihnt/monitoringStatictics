@@ -14,7 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 private const val TAG = "MainActivity"
 
 class MainActivity : ComponentActivity() {
-    private lateinit var dbConnection: dbConnection
+    private lateinit var dbConnection: UploadStatictics
     private lateinit var userRegistration: UserRegistration
     private lateinit var dbInfoGet: dbInfoGet
     private lateinit var auth: FirebaseAuth
@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val FirebaseFirestore = FirebaseFirestore.getInstance()
-        dbConnection = dbConnection(FirebaseFirestore)
+        dbConnection = UploadStatictics(FirebaseFirestore)
         userRegistration = UserRegistration(FirebaseFirestore)
         dbInfoGet = dbInfoGet(FirebaseFirestore)
         auth = FirebaseAuth.getInstance()

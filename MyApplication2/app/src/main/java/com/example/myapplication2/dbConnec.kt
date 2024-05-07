@@ -10,7 +10,7 @@ import java.util.Date
 import java.util.HashMap
 
 
-class dbConnection(val db : FirebaseFirestore) {
+class UploadStatictics(val db : FirebaseFirestore) {
 
     val TAG = "dbConnection"
     val tag = "dailyStatus"
@@ -30,7 +30,7 @@ class dbConnection(val db : FirebaseFirestore) {
              data[usageStat.packageName] = usageData
             }
             //データの格納
-            db.collection("userId")
+            db.collection("statistics")
                 .document("dailyStatus")
                 .set(data)
                 .addOnSuccessListener { Log.d(tag,"successfully upload!") }
