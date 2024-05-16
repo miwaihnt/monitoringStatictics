@@ -15,6 +15,7 @@ class UsageStatsClass(private val context: Context) {
         get() {
             val usageStatsManager =
                 context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+            Log.d("usageStatsManager","usageStatsManager:$usageStatsManager")
             val calendar: Calendar = Calendar.getInstance()
             calendar.set(Calendar.HOUR_OF_DAY, 0)
 
@@ -25,11 +26,13 @@ class UsageStatsClass(private val context: Context) {
             )
         }
 
+
     // 外部から実行するための関数
     fun readOneDayUsageStats() : List<UsageStats> {
         // アプリごとの使用情報をListとして取得
         val usageStats = usageStatsObject
-        writeLogToFile(usageStats)
+        Log.d("usageStats","usageStats:$usageStats")
+        //writeLogToFile(usageStats)
         val resultList = mutableListOf<UsageStats>()
 
         // for文を使用することで、usageStatに一つのアプリの使用情報を取得する
@@ -51,22 +54,22 @@ class UsageStatsClass(private val context: Context) {
         return resultList
     }
 
-    private fun writeLogToFile(usageStats: List<UsageStats>){
-        try{
-            val logFile = File(context.getExternalFilesDir(null),"Log.txt")
-            val writer = FileWriter(logFile, true)
-
-            for (usageStat in usageStats){
-                if(usageStat.totalTimeInForeground == 0L){
-                    continue
-                }
-                val logMessage = "packageName: ${usageStat.packageName}\ttotalTimeDisplayed: ${usageStat.totalTimeInForeground}\tfirstTime: ${getStringDate(usageStat.firstTimeStamp)}\tlastTime: ${getStringDate(usageStat.lastTimeUsed)}"
-                writer.appendln(logMessage)
-            }
-        } catch (e:Exception) {
-            Log.e(TAG, "Error writing log to file",e)
-        }
-    }
+//    private fun writeLogToFile(usageStats: List<UsageStats>){
+//        try{
+//            val logFile = File(context.getExternalFilesDir(null),"Log.txt")
+//            val writer = FileWriter(logFile, true)
+//
+//            for (usageStat in usageStats){
+//                if(usageStat.totalTimeInForeground == 0L){
+//                    continue
+//                }
+//                val logMessage = "packageName: ${usageStat.packageName}\ttotalTimeDisplayed: ${usageStat.totalTimeInForeground}\tfirstTime: ${getStringDate(usageStat.firstTimeStamp)}\tlastTime: ${getStringDate(usageStat.lastTimeUsed)}"
+//                writer.appendln(logMessage)
+//            }
+//        } catch (e:Exception) {
+//            Log.e(TAG, "Error writing log to file",e)
+//        }
+//    }
 
     // long型のミリ秒をString型の人間がわかりやすい形に変換する
     private fun getStringDate(milliseconds: Long): String {

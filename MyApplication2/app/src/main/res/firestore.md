@@ -1,3 +1,10 @@
+
+
+## 統計情報アップロードタイミング
+- 取得:アプリ起動時
+- アップロード：ログイン後（ログイン前だとキャッシュによりuidが変わらない。実機は同じ端末で同じユーザだから考慮は不要な気がするが ）
+- 
+
 ## FireSore
 
 [クライアントサイドジョイン](https://www.google.com/search?q=client+side+join&oq=client+side+join&gs_lcrp=EgZjaHJvbWUyBggAEEUYOTIKCAEQABiABBiiBDIKCAIQABiABBiiBDIKCAMQABiABBiiBNIBCDM4NzdqMGo0qAIAsAIB&sourceid=chrome&ie=UTF-8#fpstate=ive&vld=cid:3146b0e4,vid:KnGnxufvYGg,st:0)
@@ -203,3 +210,7 @@ restaurant(コレクション)
         location:
             
 
+
+## 備忘
+statisticsのDBモデリング通りにアップロードしたい
+uidをユーザがわのuidと紐付けた。

@@ -1,5 +1,6 @@
 package com.example.myapplication2
 
+import android.app.usage.UsageStats
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -20,8 +21,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
-val iconList = listOf (
+val iconList = listOf(
     Icons.Default.Add,
     Icons.Default.AccountBox,
     Icons.Default.AccountCircle,
@@ -75,27 +77,38 @@ val iconList = listOf (
 
 //ユーザ登録
 fun onRegisterClicked(
-    email:String,
-    password:String,
-    userRegistration:UserRegistration,
+    email: String,
+    password: String,
+    userRegistration: UserRegistration,
     auth: FirebaseAuth,
-    userName:String
+    userName: String
 ) {
-    userRegistration.registration(email,password,auth,userName)
+    userRegistration.registration(email, password, auth, userName)
 }
 
 //ログイン認証
 
-fun performLogin(email: String,password: String,auth: FirebaseAuth,navController: NavController){
-    FirebaseAuth.getInstance().signInWithEmailAndPassword(email,password)
-        .addOnCompleteListener{task ->
-            if(task.isSuccessful){
+fun performLogin(
+    email: String,
+    password: String,
+    auth: FirebaseAuth,
+    navController: NavController,
+    FirebaseFirestore:FirebaseFirestore,
+    usageStats:List<UsageStats>
+) {
+
+    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
                 navController.navigate("HomeIcon")
-                Log.d("performLogin","Succcess")
+                val UploadStatictics: UploadStatictics
+                UploadStatictics = UploadStatictics(FirebaseFirestore)
+                UploadStatictics.uploadusestate(usageStats)
+                Log.d("performLogin", "Succcess")
             } else {
-                Log.d("performLogin","Failed")
+                Log.d("performLogin", "Failed")
                 val errorCode = task.exception?.message
-                Log.e("performLogin","ErrorCode: $errorCode")
+                Log.e("performLogin", "ErrorCode: $errorCode")
             }
         }
 }
@@ -103,14 +116,13 @@ fun performLogin(email: String,password: String,auth: FirebaseAuth,navController
 //メールアドレス登録画面
 @Composable
 fun RegistrationScreen(
-    navController:NavController,
+    navController: NavController,
     userRegistration: UserRegistration,
     auth: FirebaseAuth
-)
-{
-    Log.d("RegistrationScreen","RegistrationScreen Composable is called")
+) {
+    Log.d("RegistrationScreen", "RegistrationScreen Composable is called")
 
-    var userName by remember{ mutableStateOf(value = "") }
+    var userName by remember { mutableStateOf(value = "") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -124,8 +136,8 @@ fun RegistrationScreen(
         //ユーザ名入力フィールド
         TextField(
             value = userName,
-            onValueChange ={userName = it},
-            label = { Text(text = "ユーザ名")},
+            onValueChange = { userName = it },
+            label = { Text(text = "ユーザ名") },
             modifier = Modifier.padding(16.dp)
         )
 
@@ -147,9 +159,9 @@ fun RegistrationScreen(
         )
         Button(
             onClick = {
-                onRegisterClicked(email, password,userRegistration,auth,userName)
+                onRegisterClicked(email, password, userRegistration, auth, userName)
                 navController.navigate("Login")
-                      },
+            },
             modifier = Modifier
                 .padding(16.dp)
                 .width(200.dp)
@@ -165,33 +177,36 @@ fun RegistrationScreen(
 @Composable
 fun Login(
     navController: NavController,
-    auth: FirebaseAuth
+    auth: FirebaseAuth,
+    FirebaseFirestore:FirebaseFirestore,
+    usageStats:List<UsageStats>
 ) {
     var email by remember { mutableStateOf("") }
-    var password by remember{ mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
-    ){
+    ) {
 
         TextField(
             value = email,
-            onValueChange = {email = it},
-            label = { Text("Email")},
+            onValueChange = { email = it },
+            label = { Text("Email") },
             modifier = Modifier.padding(16.dp)
         )
 
         TextField(
             value = password,
-            onValueChange = { password = it},
-            label = {Text("password")},
+            onValueChange = { password = it },
+            label = { Text("password") },
             modifier = Modifier.padding(16.dp)
         )
 
         Button(
             onClick = {
-                performLogin(email,password,auth,navController)},
+                performLogin(email, password, auth, navController,FirebaseFirestore,usageStats)
+            },
             modifier = Modifier
                 .padding(16.dp)
                 .width(200.dp)
@@ -200,43 +215,60 @@ fun Login(
         }
         Button(
             onClick = {
-                      navController.navigate("RegistrationScreen")},
+                navController.navigate("RegistrationScreen")
+            },
             modifier = Modifier
                 .padding(8.dp)
                 .width(200.dp)
-            ) {
+        ) {
             Text("新規登録")
         }
     }
 }
 
 
-//ホーム画面（作成中）
+//ホーム画面
 @Composable
-fun HomeIcon(navController: NavController,dbInfoGet: dbInfoGet){
+fun HomeIcon(navController: NavController, dbInfoGet: dbInfoGet, dbAddFollowData: dbAddFollowData) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-        ){
-        Button(onClick = {
-            //userInfoGet
+    ) {
+        Button(
+            onClick = { //userInfoGet
             dbInfoGet.getInfo()
-            Log.d("HomeIcon","calling HomeIconButton")
-         })
-        {
+            Log.d("HomeIcon", "calling HomeIconButton")
+            }
+        ) {
             Text(text = "ユーザ情報取得")
+        }
+        Button(
+            onClick = {
+            //friendSearchScreen
+            Log.d("FriendIcon", "calling FriendIconButton")
+            navController.navigate("FriendSearchScreen")
+            }
+        ) {
+            Text(text = "友達を探す")
+        }
+        Button(
+            onClick = {
+                navController.navigate("StatisticsInfo")
+            }
+        ) {
+            Text(text = "統計情報取得")
         }
     }
 
-    Row (
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement =  Arrangement.SpaceEvenly,
+        horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.Bottom
-        ) {
+    ) {
         IconButton(
             onClick = {
-            println("Clicked!")
-        },
+                println("Clicked!")
+            },
             modifier = Modifier
                 .size(48.dp)
                 .padding(vertical = 8.dp)
@@ -249,8 +281,8 @@ fun HomeIcon(navController: NavController,dbInfoGet: dbInfoGet){
         }
         IconButton(
             onClick = {
-            println("Clicked!")
-        },
+                println("Clicked!")
+            },
             modifier = Modifier
                 .size(48.dp)
                 .padding(vertical = 8.dp)
@@ -258,10 +290,8 @@ fun HomeIcon(navController: NavController,dbInfoGet: dbInfoGet){
             Icon(
                 imageVector = Icons.Default.Settings,
                 contentDescription = "Add",
-                )
+            )
         }
     }
 }
-
-
 

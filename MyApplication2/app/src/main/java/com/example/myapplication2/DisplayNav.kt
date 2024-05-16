@@ -6,24 +6,38 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import android.app.usage.UsageStats
+import android.app.usage.UsageStatsManager
 
 @Composable
-fun DisplayNav(userRegistration: UserRegistration, auth: FirebaseAuth,dbInfoGet: dbInfoGet) {
+fun DisplayNav(userRegistration: UserRegistration, auth: FirebaseAuth, dbInfoGet: dbInfoGet,
+               dbAddFollowData: dbAddFollowData,FirebaseFirestore: FirebaseFirestore,usageStats:List<UsageStats>) {
 
     val navController = rememberNavController()
 
+
     NavHost(navController = navController,
-            startDestination = "Login" ) {
+        startDestination = "Login" ) {
 
         composable( route = "RegistrationScreen") {
             RegistrationScreen(navController = navController,userRegistration,auth)
         }
         composable(route = "Login") {
-            Login(navController = navController,auth)
+            Login(navController = navController,auth,FirebaseFirestore,usageStats)
         }
         composable( route = "HomeIcon") {
-            HomeIcon(navController = navController,dbInfoGet)
+            HomeIcon(navController = navController,dbInfoGet,dbAddFollowData)
         }
+        composable( route = "FriendSearchScreen") {
+            FriendSearchScreen(dbAddFollowData,navController = navController)
+        }
+        composable( route = "StatisticsInfo"){
+            StatisticsInfo(navController = navController)
+        }
+
     }
     Log.d("DisplayNav","Called DisplayNav")
 }
+
+

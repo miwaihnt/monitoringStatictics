@@ -14,17 +14,21 @@ import com.google.firebase.auth.FirebaseAuth
 private const val TAG = "MainActivity"
 
 class MainActivity : ComponentActivity() {
-    private lateinit var dbConnection: UploadStatictics
+    private lateinit var UploadStatictics: UploadStatictics
     private lateinit var userRegistration: UserRegistration
     private lateinit var dbInfoGet: dbInfoGet
+    private lateinit var dbAddFollowData: dbAddFollowData
+    private lateinit var dbgetDocumentId: dbgetDocumentId
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val FirebaseFirestore = FirebaseFirestore.getInstance()
-        dbConnection = UploadStatictics(FirebaseFirestore)
+        UploadStatictics = UploadStatictics(FirebaseFirestore)
         userRegistration = UserRegistration(FirebaseFirestore)
         dbInfoGet = dbInfoGet(FirebaseFirestore)
+        dbAddFollowData = dbAddFollowData(FirebaseFirestore)
+        dbgetDocumentId = dbgetDocumentId(FirebaseFirestore)
         auth = FirebaseAuth.getInstance()
         setContent {
             MyApplication2Theme {
@@ -34,16 +38,16 @@ class MainActivity : ComponentActivity() {
                     //統計情報の状態確認
 //                    val permissionResult = checkReadStatsPermission(this)
 //                    Log.d("PermissionCheck", "Result: $permissionResult")
-//                    val usageStatsClass = UsageStatsClass(this)
-//                    usageStatsClass.readOneDayUsageStats()
-//                    val usageStats = usageStatsClass.readOneDayUsageStats()
-//                    dbConnection.uploadusestate(usageStats)
-                    DisplayNav(userRegistration,auth,dbInfoGet)
+                    val usageStatsClass = UsageStatsClass(this)
+                    val usageStats = usageStatsClass.readOneDayUsageStats()
+                    DisplayNav(userRegistration,auth,dbInfoGet,dbAddFollowData,FirebaseFirestore,usageStats)
+//                    UploadStatictics.uploadusestate(usageStats)
                     Log.d(TAG,"OnCreate Call")
 
                 }
             }
         }
+
     }
 
     override fun onStart() {
