@@ -236,17 +236,17 @@ fun HomeIcon(navController: NavController, dbInfoGet: dbInfoGet, dbAddFollowData
     ) {
         Button(
             onClick = { //userInfoGet
-            dbInfoGet.getInfo()
-            Log.d("HomeIcon", "calling HomeIconButton")
+                dbInfoGet.getInfo()
+                Log.d("HomeIcon", "calling HomeIconButton")
             }
         ) {
             Text(text = "ユーザ情報取得")
         }
         Button(
             onClick = {
-            //friendSearchScreen
-            Log.d("FriendIcon", "calling FriendIconButton")
-            navController.navigate("FriendSearchScreen")
+                //friendSearchScreen
+                Log.d("FriendIcon", "calling FriendIconButton")
+                navController.navigate("FriendSearchScreen")
             }
         ) {
             Text(text = "友達を探す")
@@ -281,7 +281,10 @@ fun HomeIcon(navController: NavController, dbInfoGet: dbInfoGet, dbAddFollowData
         }
         IconButton(
             onClick = {
-                println("Clicked!")
+                // Settingボタンが押されたときの処理
+                //
+                Log.d("SettingIcon","calling ProfileSettingsScreen")
+                navController.navigate("ProfileSettingsScreen")
             },
             modifier = Modifier
                 .size(48.dp)
@@ -294,4 +297,3 @@ fun HomeIcon(navController: NavController, dbInfoGet: dbInfoGet, dbAddFollowData
         }
     }
 }
-
