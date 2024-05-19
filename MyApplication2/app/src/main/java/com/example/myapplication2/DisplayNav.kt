@@ -35,6 +35,9 @@ fun DisplayNav(userRegistration: UserRegistration, auth: FirebaseAuth, dbInfoGet
         composable( route = "StatisticsInfo"){
             StatisticsInfo(navController = navController)
         }
+        composable( route = "ProfileSettingsScreen") {
+            ParentComponent(navController = navController)
+        }
 
     }
     Log.d("DisplayNav","Called DisplayNav")
