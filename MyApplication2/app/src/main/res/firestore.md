@@ -1,9 +1,33 @@
-
-
 ## 統計情報アップロードタイミング
 - 取得:アプリ起動時
 - アップロード：ログイン後（ログイン前だとキャッシュによりuidが変わらない。実機は同じ端末で同じユーザだから考慮は不要な気がするが ）
-- 
+- ダウンロード
+- 非同期処理の実装
+- インスタンス化タイミングの検討
+- ユーザ登録周りの挙動が怪しい（@icloud.com)でログインできない
+- 統計情報を取得しログに吐く（サブコレクション）→OKだが、重複した日付は最初にヒットしたものが取得されるので、並び替えは必要
+- ユーザごとに統計情報を取得→OK
+- followingに登録されているユーザの情報を取得する
+
+## データモデル
+statistics (コレクション)
+└── {user_id} (ドキュメント)
+└── dailyStatistics (サブコレクション)
+├── {date} (ドキュメント) <同一日の更新は上書き>
+│    ├── com.google.android.apps.nexuslauncher (マップ)
+│    ├── com.android.settings (マップ)
+│    ├── com.example.myapplication2 (マップ)
+│    └── com.google.android.settings.intelligence (マップ)
+└── {date} (ドキュメント)
+├── com.google.android.apps.nexuslauncher (マップ)
+├── com.android.settings (マップ)
+├── com.example.myapplication2 (マップ)
+└── com.google.android.settings.intelligence (マップ)
+
+- ドキュメントが空（サブコレクションにてデータを管理する）場合、コレクションに対するクエリが失敗する（何も返さない）
+  そのため、ドキュメントに設定されているドキュメントidをコレクションに対するクエリで取得して、、、その後
+  db.collection("statistics").document("userid").subcollection()
+  みたいなことができない。
 
 ## FireSore
 

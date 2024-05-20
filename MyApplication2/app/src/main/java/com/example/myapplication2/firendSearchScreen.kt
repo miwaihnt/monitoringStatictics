@@ -15,6 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
@@ -43,15 +44,22 @@ fun FriendSearchScreen(dbAddFollowData: dbAddFollowData,navController: NavContro
             Text(text = "検索中...")
         } else if (searchResult != null) {
             val (foundName, foundEmail) = searchResult!!
-            Text(text = "検索結果")
-            Text(text = "名前: $foundName")
-            Text(text = "メールアドレス: $foundEmail")
+            if (foundEmail == FirebaseAuth.getInstance().currentUser?.email) {
+                // ログインしているユーザーのメールアドレスと一致する場合の処理
+                Text(text = "検索結果")
+                Text(text = "名前: $foundName" + "(自分)")
+                Text(text = "メールアドレス: $foundEmail" + "(自分)")
+            } else {
+                // 他のユーザーの検索結果表示
+                Text(text = "検索結果")
+                Text(text = "名前: $foundName")
+                Text(text = "メールアドレス: $foundEmail")
+            }
         } else {
             Text(text = "検索結果")
             Text(text = "名前: 該当なし")
             Text(text = "メールアドレス: 該当なし")
         }
-
 
         // 検索ボタン
         Button(
@@ -65,16 +73,26 @@ fun FriendSearchScreen(dbAddFollowData: dbAddFollowData,navController: NavContro
                     .whereEqualTo("email", searchText)
                     .get()
                     .addOnSuccessListener { documents ->
-                        Log.d("TAG","document:$documents")
                         for (document in documents) {
-                            Log.d("document id", "documentid:$document.id")
                             val foundName = document.getString("userName") ?: "名前なし"
                             val foundEmail = document.getString("email") ?: "メールアドレスなし"
-                            searchResult = Pair(foundName, foundEmail)
-                            // followingに新しく登録
-                            dbAddFollowData.addFollowingData(document.id)
-                            dbAddFollowData.addFollowersData(document.id)
-                            Log.d("FriendSearchScreen", "User name for email $foundName: $foundEmail")
+                            if (foundEmail == FirebaseAuth.getInstance().currentUser?.email) {
+                                // ログインしているユーザーのメールアドレスと一致する場合の処理
+                                searchResult = Pair(foundName, foundEmail)
+                                Log.d(
+                                    "FriendSearchScreen",
+                                    "User name for email $foundName: $foundEmail"
+                                )
+                            } else {
+                                // 他のユーザーの検索結果表示
+                                searchResult = Pair(foundName, foundEmail)
+                                dbAddFollowData.addFollowingData(document.id)
+                                dbAddFollowData.addFollowersData(document.id)
+                                Log.d(
+                                    "FriendSearchScreen",
+                                    "User name for email $foundName: $foundEmail"
+                                )
+                            }
                         }
                         // 検索が完了したので検索中フラグを下ろす
                         searching = false
@@ -87,7 +105,7 @@ fun FriendSearchScreen(dbAddFollowData: dbAddFollowData,navController: NavContro
                     }
             }
         ) {
-            Text(text = "検索")
+            Text(text = "登録")
         }
     }
 }
