@@ -19,6 +19,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var dbInfoGet: dbInfoGet
     private lateinit var dbAddFollowData: dbAddFollowData
     private lateinit var dbgetDocumentId: dbgetDocumentId
+    private lateinit var getStatistics:getStatistics
     private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,21 +30,17 @@ class MainActivity : ComponentActivity() {
         dbInfoGet = dbInfoGet(FirebaseFirestore)
         dbAddFollowData = dbAddFollowData(FirebaseFirestore)
         dbgetDocumentId = dbgetDocumentId(FirebaseFirestore)
+        getStatistics = getStatistics(FirebaseFirestore)
         auth = FirebaseAuth.getInstance()
         setContent {
             MyApplication2Theme {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    //統計情報の状態確認
-//                    val permissionResult = checkReadStatsPermission(this)
-//                    Log.d("PermissionCheck", "Result: $permissionResult")
                     val usageStatsClass = UsageStatsClass(this)
                     val usageStats = usageStatsClass.readOneDayUsageStats()
-                    DisplayNav(userRegistration,auth,dbInfoGet,dbAddFollowData,FirebaseFirestore,usageStats)
-//                    UploadStatictics.uploadusestate(usageStats)
+                    DisplayNav(userRegistration,auth,dbInfoGet,dbAddFollowData,FirebaseFirestore,usageStats,getStatistics)
                     Log.d(TAG,"OnCreate Call")
-
                 }
             }
         }

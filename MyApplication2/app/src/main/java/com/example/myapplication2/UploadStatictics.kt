@@ -3,6 +3,7 @@ package com.example.myapplication2
 import android.util.Log
 import android.app.usage.UsageStats
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import java.text.SimpleDateFormat
 import java.util.Locale
 import com.google.firebase.firestore.FirebaseFirestore
@@ -58,6 +59,11 @@ class UploadStatictics(val db : FirebaseFirestore) {
             Log.d(TAG,"currentuserはnullジャない")
 
             try {
+
+                //ドキュメントの追加
+                val UserdocRef = db.collection("statistics").document(uid)
+                UserdocRef.set(mapOf("cratedAt" to FieldValue.serverTimestamp()))
+
                 //データの整形
                 val data = HashMap<String, Any>()
                 for (usageStat in usageStats) {
@@ -69,12 +75,16 @@ class UploadStatictics(val db : FirebaseFirestore) {
                     )
                     data[usageStat.packageName] = usageData
                 }
-
-                db.collection("statistics")
-                    .document("$uid")
-                    .collection("$FormatDate")
+                //サブコレクションの追加
+                UserdocRef.collection("dailyStatistics")
                     .document("$FormatDate")
                     .set(data)
+
+//                db.collection("statistics")
+//                    .document("$uid")
+//                    .collection("dailyStatistics")
+//                    .document("$FormatDate")
+//                    .set(data)
 
             } catch (e: Exception) {
                 Log.e(tag, "Failure upload")

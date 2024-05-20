@@ -12,7 +12,7 @@ import android.app.usage.UsageStatsManager
 
 @Composable
 fun DisplayNav(userRegistration: UserRegistration, auth: FirebaseAuth, dbInfoGet: dbInfoGet,
-               dbAddFollowData: dbAddFollowData,FirebaseFirestore: FirebaseFirestore,usageStats:List<UsageStats>) {
+               dbAddFollowData: dbAddFollowData,FirebaseFirestore: FirebaseFirestore,usageStats:List<UsageStats>,getStatistics:getStatistics) {
 
     val navController = rememberNavController()
 
@@ -33,7 +33,7 @@ fun DisplayNav(userRegistration: UserRegistration, auth: FirebaseAuth, dbInfoGet
             FriendSearchScreen(dbAddFollowData,navController = navController)
         }
         composable( route = "StatisticsInfo"){
-            StatisticsInfo(navController = navController)
+            StatisticsInfo(navController = navController,getStatistics)
         }
 
     }

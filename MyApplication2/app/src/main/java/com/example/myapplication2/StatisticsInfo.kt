@@ -9,16 +9,14 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.navigation.NavController
 
 @Composable
-fun StatisticsInfo(navController: NavController){
+fun StatisticsInfo(navController: NavController,getStatistics:getStatistics){
    Column ( 
        verticalArrangement = Arrangement.Center,
        horizontalAlignment = CenterHorizontally
    ) {
      
       Button(onClick = {
-
-//          getStatistics()
-      
+          getStatistics.getStatisticsInfo()
         }
       
       ) {
