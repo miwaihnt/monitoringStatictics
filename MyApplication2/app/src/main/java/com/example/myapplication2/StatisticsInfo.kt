@@ -17,17 +17,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun StatisticsInfo(navController: NavController, getStatistics: getStatistics) {
     var dailyStatistics by remember { mutableStateOf(emptyList<DailyStatistics>()) }
-    var selectedDate by remember { mutableStateOf<String?>(null) }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var selectedApps by remember { mutableStateOf(emptyList<AppUsageData>()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var showDatePicker by remember { mutableStateOf(false) }
 
     val currentUser = FirebaseAuth.getInstance().currentUser
 
@@ -54,28 +58,33 @@ fun StatisticsInfo(navController: NavController, getStatistics: getStatistics) {
         if (errorMessage != null) {
             Text(text = "Error: $errorMessage", color = Color.Red)
         } else if (dailyStatistics.isNotEmpty()) {
-            Text(text = "日付を選択してください：")
-            Column {
-                dailyStatistics.forEach { dailyStat ->
-                    Text(
-                        text = dailyStat.date,
-                        modifier = Modifier
-                            .clickable {
-                                selectedDate = dailyStat.date
-                                selectedApps = dailyStat.apps.sortedByDescending { it.totalTimeInForeground }
-                            }
-                            .padding(8.dp)
-                    )
-                }
+            Button(onClick = { showDatePicker = true }) {
+                Text(text = "日付を選択")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            selectedDate?.let {
-                Text(text = "選択された日付：$it")
-                if (selectedApps.isNotEmpty()) {
-                    AppUsageTable(appUsageData = selectedApps)
-                }
+            Text(text = "選択された日付：${selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}")
+            if (selectedApps.isNotEmpty()) {
+                AppUsageChart(appUsageData = selectedApps)
+            }
+
+            if (showDatePicker) {
+                val context = LocalContext.current
+                android.app.DatePickerDialog(
+                    context,
+                    { _, year, month, dayOfMonth ->
+                        val newDate = LocalDate.of(year, month + 1, dayOfMonth)
+                        selectedDate = newDate
+                        selectedApps =
+                            dailyStatistics.firstOrNull { it.date == newDate.toString() }?.apps?.sortedByDescending { it.totalTimeInForeground }
+                                ?: emptyList()
+                        showDatePicker = false
+                    },
+                    selectedDate.year,
+                    selectedDate.monthValue - 1,
+                    selectedDate.dayOfMonth
+                ).show()
             }
         }
     }
