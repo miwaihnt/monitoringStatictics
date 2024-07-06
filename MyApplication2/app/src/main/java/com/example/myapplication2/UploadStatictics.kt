@@ -56,7 +56,7 @@ class UploadStatictics(val db : FirebaseFirestore) {
 
         if (currentUser != null) {
             val uid = currentUser.uid
-            Log.d(TAG,"currentuserはnullジャない")
+            Log.d("UploadStatictics","uid:$uid")
 
             try {
 

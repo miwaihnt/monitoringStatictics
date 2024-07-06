@@ -22,19 +22,52 @@ class UserRegistration(val db : FirebaseFirestore){
                     // Sign in 2success, update UI with the signed-in user's information
                     Log.d(TAG, "createUserWithEmail:success")
                     val user = auth.currentUser
-//                    updateUI(user)
+                    if (user !== null) {
+                        val userId = user.uid
+                        Log.d(TAG,"userid:$userId")
+                        try {
+                            val firebaseUser = hashMapOf(
+                                "userName" to userName,
+                                "email" to email,
+                                "password" to password
+                            )
+                            db.collection("User")
+                                .document(userId)
+                                .set(firebaseUser)
+                                .addOnSuccessListener {
+                                    Log.d(TAG,"userDocCreate:$userId")
+                                    val followData =  hashMapOf(
+                                        "followers" to emptyList<String>(),
+                                        "following" to emptyList<String>()
+                                    )
+                                    db.collection("User").document(userId).collection("FollowData")
+                                        .add(followData)
+                                        .addOnSuccessListener { subDocumentReference ->
+                                            Log.d(TAG,"Subcollection added with ID: ${subDocumentReference.id}")
+                                        }
+                                        .addOnFailureListener { e ->
+                                            Log.e(TAG,"Error adding subCollection,e")
+                                        }
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.e(TAG, "Error adding document", e)
+                                }
+
+                        } catch (e:Exception) {
+                            Log.e(TAG,"Failure Registration")
+                        }
+
+                    }
+
+
+
+
                 } else {
-                    // If sign in fails, display a message to the user.
                     Log.w(TAG, "createUserWithEmail:failure", task.exception)
-//                    Toast.makeText(
-//                        baseContext,
-//                        "Authentication failed.",
-//                        Toast.LENGTH_SHORT,
-//                    ).show()
-//                    updateUI(null)
                 }
             }
 
+        //firebase firestoreにユーザドキュメントを作成
         try {
             val user = hashMapOf(
                 "userName" to userName,

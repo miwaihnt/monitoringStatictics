@@ -36,6 +36,7 @@ fun ParentComponent(navController: NavController) {
 
     // Firestoreからユーザー名を取得
     LaunchedEffect(currentUser) {
+        Log.d("TAG","currentThread:$${Thread.currentThread().name}")
         currentUser?.let { user ->
             val userEmail = user.email
 
@@ -47,6 +48,7 @@ fun ParentComponent(navController: NavController) {
                         Log.d("ParentComponent", "User with email $userEmail not found")
                     } else {
                         for (document in querySnapshot) {
+                            Log.d("TAG","document:$document")
                             val fetchedUserName = document.getString("userName") ?: "名前なし"
                             userNameState.value = fetchedUserName
                         }
@@ -84,6 +86,7 @@ fun ParentComponent(navController: NavController) {
                                         Log.d("ProfileSettingsScreen", "User name updated successfully")
                                         // スナックバーを表示
                                         coroutineScope.launch {
+                                            Log.d("TAG","Thread:${Thread.currentThread().name}")
                                             val Name = userNameState.value
                                             snackbarHostState.showSnackbar("名前が $Name に更新されました")
                                         }
@@ -117,8 +120,8 @@ fun ProfileSettingsScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // 新しいユーザー名を表示
-            Text(text = "New userName: $userName")
+            // 新しいユーザー名を表示userName
+            Text(text = "New userName: $")
 
             // 名前入力フィールド
             OutlinedTextField(

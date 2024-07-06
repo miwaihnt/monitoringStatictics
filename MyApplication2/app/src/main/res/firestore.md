@@ -1,13 +1,144 @@
-## 統計情報アップロードタイミング
+
+## MVVMによる分離(hiltによるDI）
+
+- hiltによるDI🙆‍♀️
+- [MVVMによる分離](https://qiita.com/sdkei/items/a48ae24536562ed000b3)
+  - view,viewModel,Modelとあるが、今はModelがない感じ。 
+
+
+## フォロー画面の改善
+
+- 現在：ユーザ検索して、即フォロー対象になっている
+- あるべき1:ユーザ検索とフォローは分けるべき
+- あるべき2:フォローは相手の承認を持って完了とすべき
+
+
+## 友達一覧を表示
+
+- 現状
+  - firestoreのユーザデータ全量の表示　🙆‍♀️
+  - フォローしているものだけを表示🙆‍
+    - authのuidとfirebaseのuserのドキュメントIDを一致🙆‍♀️
+  - ユーザをタップ後、統計情報画面に遷移 🙆‍
+  - 画面を今風に
+    - card　🙆‍♀️
+    - 画像と名前の表示
+
+## profileの編集
+
+    - 画像
+        - 画像アップロード🙆‍♀️   
+    - 名前
+    - フォロー/フォロワー
+    - 通知
+
+    
+
+
+[//]: # (- ポケモンサーチを例に)
+
+[//]: # (  - 前提知識；fragment)
+
+[//]: # (    - 以下により考慮不要)
+
+[//]: # (      fragmentはcomposeが出る前に考慮が必要だったが、 composeでは不要)
+
+[//]: # (    > fragmentの問題)
+
+[//]: # (    )
+[//]: # (    > class CounterActivity : AppCompatActivity&#40;&#41; {)
+
+[//]: # (    private var count = 0)
+
+[//]: # (    override fun onCreate&#40;savedInstanceState: Bundle?&#41; {)
+
+[//]: # (    super.onCreate&#40;savedInstanceState&#41;)
+
+[//]: # (    setContentView&#40;R.layout.activity_counter&#41;)
+
+[//]: # (        // カウンターの値を表示するTextView)
+
+[//]: # (        val counterTextView = findViewById<TextView>&#40;R.id.counterTextView&#41;)
+
+[//]: # ()
+[//]: # (        // カウントをインクリメントしてTextViewに表示する)
+
+[//]: # (        count++)
+
+[//]: # (        counterTextView.text = "Count: $count")
+
+[//]: # (    })
+
+[//]: # (    })
+
+[//]: # (    この例だと、onCreate時にcountの生成やインクリメントをしているが、何かの事情でアクティビティが破棄された場合)
+
+[//]: # (    countの値が初期値されてしまう。)
+
+[//]: # (    そもそもfragmentを使う理由は1画面の機能ごとにactivityを用意する場合、)
+
+[//]: # (    メモリの過剰消費に繋がるため、同画面内の部品ごとにfragmentとして構築していた（activityのライフサイクルにfragmentは紐づいているので）)
+
+[//]: # (  )
+[//]: # (    一方、composableはライフサイクルとは独立しているため、ライフサイクルによる影響はない)
+
+[//]: # (　　)
+[//]: # (  > @Composable)
+
+[//]: # (    fun CounterScreen&#40;&#41; {)
+
+[//]: # (    var count by remember { mutableStateOf&#40;0&#41; )
+
+[//]: # (    Column&#40;)
+
+[//]: # (    verticalArrangement = Arrangement.Center,)
+
+[//]: # (    horizontalAlignment = Alignment.CenterHorizontally,)
+
+[//]: # (    modifier = Modifier.fillMaxSize&#40;&#41;)
+
+[//]: # (    &#41; {)
+
+[//]: # (    Text&#40;text = "Count: $count", fontSize = 24.sp&#41;)
+
+[//]: # (    Button&#40;onClick = { count++ }&#41; {)
+
+[//]: # (    Text&#40;text = "Increment"&#41;)
+
+[//]: # (    })
+
+[//]: # (    })
+
+[//]: # (    })
+
+[//]: # ()
+[//]: # (  )
+[//]: # (  - 前提知識；viewmodel)
+
+[//]: # (        - viewmodelとcompoableの比較（というかcomposableで使用が必要か？）)
+
+
+
+
+## 統計情報取得タイミング
 - 取得:アプリ起動時
+- 取得：oncreate時なので、アプリ起動時のタイミング。アプリを開きっぱだと古い情報だが、良い？
+
+## 統計情報アップロードタイミング
 - アップロード：ログイン後（ログイン前だとキャッシュによりuidが変わらない。実機は同じ端末で同じユーザだから考慮は不要な気がするが ）
-- ダウンロード
-- 非同期処理の実装
 - インスタンス化タイミングの検討
 - ユーザ登録周りの挙動が怪しい（@icloud.com)でログインできない
-- 統計情報を取得しログに吐く（サブコレクション）→OKだが、重複した日付は最初にヒットしたものが取得されるので、並び替えは必要
+- こルーチンでの非同期処理とする→OK
+
+## 統計情報取得
 - ユーザごとに統計情報を取得→OK
-- followingに登録されているユーザの情報を取得する
+- 機能テストはOKなので、実際のアプリの動きに沿って改良する
+  - 友達の一覧が画面に表示されている状態で、クリックしたら統計情報が取得される。
+    この取得の際に権限チェックがされる
+    - 友達A
+    - 友達B
+  - 権限チェック
+    - 相手が自分のことをFollowingしていたら取得？
 
 ## データモデル
 statistics (コレクション)

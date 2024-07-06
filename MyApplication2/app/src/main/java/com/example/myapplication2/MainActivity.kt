@@ -4,15 +4,26 @@ import android.util.Log
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
+import com.example.myapplication2.View2.FileUploadScreen
+import com.example.myapplication2.View2.ListFriendsUI
+import com.example.myapplication2.View2.LogInView
+import com.example.myapplication2.View2.NavGraph
+import com.example.myapplication2.View2.Profile
+import com.example.myapplication2.ViewModel.FollowData
 import com.example.myapplication2.ui.theme.MyApplication2Theme
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
 
-private const val TAG = "MainActivity"
+private const val TAG = "MainActivity222"
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var UploadStatictics: UploadStatictics
     private lateinit var userRegistration: UserRegistration
@@ -21,6 +32,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var dbgetDocumentId: dbgetDocumentId
     private lateinit var getStatistics:getStatistics
     private lateinit var auth: FirebaseAuth
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,10 +49,18 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    val usageStatsClass = UsageStatsClass(this)
-                    val usageStats = usageStatsClass.readOneDayUsageStats()
-                    DisplayNav(userRegistration,auth,dbInfoGet,dbAddFollowData,FirebaseFirestore,usageStats,getStatistics)
-                    Log.d(TAG,"OnCreate Call")
+
+                        //新：Hiltテスト用
+//                      ListFriendsUI()
+//                      FileUploadScreen()
+                      NavGraph()
+//                      profile()
+
+
+//                    旧：統計情報取得アプリ用
+//                    val usageStatsClass = UsageStatsClass(this)
+//                    val usageStats = usageStatsClass.readOneDayUsageStats()
+//                    DisplayNav(userRegistration,auth,dbInfoGet,dbAddFollowData,FirebaseFirestore,usageStats,getStatistics,)
                 }
             }
         }

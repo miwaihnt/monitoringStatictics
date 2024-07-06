@@ -27,7 +27,7 @@ fun DisplayNav(userRegistration: UserRegistration, auth: FirebaseAuth, dbInfoGet
             Login(navController = navController,auth,FirebaseFirestore,usageStats)
         }
         composable( route = "HomeIcon") {
-            HomeIcon(navController = navController,dbInfoGet,dbAddFollowData)
+            HomeIcon(navController = navController,dbInfoGet,dbAddFollowData,auth)
         }
         composable( route = "FriendSearchScreen") {
             FriendSearchScreen(dbAddFollowData,navController = navController)
@@ -37,6 +37,12 @@ fun DisplayNav(userRegistration: UserRegistration, auth: FirebaseAuth, dbInfoGet
         }
         composable( route = "ProfileSettingsScreen") {
             ParentComponent(navController = navController)
+        }
+        composable( route = "ListFriends") {
+            ListFriends(navController= navController,dbInfoGet,auth)
+        }
+        composable( route = "IndividualStatis") {
+            IndividualStatis(navController = navController)
         }
 
     }

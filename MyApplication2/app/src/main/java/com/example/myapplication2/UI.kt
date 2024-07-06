@@ -22,6 +22,9 @@ import androidx.compose.runtime.setValue
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 val iconList = listOf(
     Icons.Default.Add,
@@ -101,9 +104,14 @@ fun performLogin(
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 navController.navigate("HomeIcon")
-                val UploadStatictics: UploadStatictics
-                UploadStatictics = UploadStatictics(FirebaseFirestore)
-                UploadStatictics.uploadusestate(usageStats)
+                //ログインが成功したら非同期で統計情報をアップロード
+                CoroutineScope(Dispatchers.IO).launch {
+                    val UploadStatictics: UploadStatictics
+                    UploadStatictics = UploadStatictics(FirebaseFirestore)
+                    UploadStatictics.uploadusestate(usageStats)
+                    Log.d("performLogin","upload compleated")
+                }
+                //非同期処理の完了を待たずにログ出力
                 Log.d("performLogin", "Succcess")
             } else {
                 Log.d("performLogin", "Failed")
@@ -229,7 +237,7 @@ fun Login(
 
 //ホーム画面
 @Composable
-fun HomeIcon(navController: NavController, dbInfoGet: dbInfoGet, dbAddFollowData: dbAddFollowData) {
+fun HomeIcon(navController: NavController, dbInfoGet: dbInfoGet, dbAddFollowData: dbAddFollowData,auth: FirebaseAuth,) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -258,6 +266,24 @@ fun HomeIcon(navController: NavController, dbInfoGet: dbInfoGet, dbAddFollowData
         ) {
             Text(text = "統計情報取得")
         }
+
+        Button(
+            onClick = {
+                navController.navigate("ListFriends")
+            }
+        ) {
+            Text(text = "友達の一覧")
+        }
+
+        Button(
+            onClick = {
+                navController.navigate("ListFriends")
+            }
+        ) {
+            Text(text = "プロフィールの編集")
+        }
+
+
     }
 
     Row(
@@ -267,7 +293,7 @@ fun HomeIcon(navController: NavController, dbInfoGet: dbInfoGet, dbAddFollowData
     ) {
         IconButton(
             onClick = {
-                println("Clicked!")
+                navController.navigate("ListFriends")
             },
             modifier = Modifier
                 .size(48.dp)
@@ -296,4 +322,7 @@ fun HomeIcon(navController: NavController, dbInfoGet: dbInfoGet, dbAddFollowData
             )
         }
     }
+
+
+
 }

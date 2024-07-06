@@ -9,6 +9,7 @@ class getStatistics(private val db: FirebaseFirestore)  {
 
     fun getStatisticsInfo(){
 
+
     Log.d(TAG,"getStatisticsInfo called")
 
         db.collection("statistics")
@@ -17,7 +18,7 @@ class getStatistics(private val db: FirebaseFirestore)  {
                 val userList = mutableListOf<String>()
                if(querySnapshot.isEmpty){
                 Log.d(TAG,"querySnapshot is Empty")
-               } else{
+               } else {
                    Log.d(TAG, "Statistics collection retrieved. Number of documents: ${querySnapshot.size()}")
                    for ( document in querySnapshot ){
                        val userId = document.id
