@@ -94,6 +94,8 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("io.coil-kt:coil-compose:1.4.0")
     implementation("androidx.test:runner:1.5.2")
+    // add new dependencies (Alice)
+    implementation("com.google.accompanist:accompanist-pager:0.23.1")
     //Junit
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.google.truth:truth:1.1.3")
