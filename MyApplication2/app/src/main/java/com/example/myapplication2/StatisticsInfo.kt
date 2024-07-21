@@ -28,11 +28,7 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun StatisticsInfo(navController: NavController, getStatistics: getStatistics) {
     var dailyStatistics by remember { mutableStateOf(emptyList<DailyStatistics>()) }
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    var selectedApps by remember { mutableStateOf(emptyList<AppUsageData>()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    var showDatePicker by remember { mutableStateOf(false) }
-
     val currentUser = FirebaseAuth.getInstance().currentUser
 
     Column(
@@ -58,34 +54,7 @@ fun StatisticsInfo(navController: NavController, getStatistics: getStatistics) {
         if (errorMessage != null) {
             Text(text = "Error: $errorMessage", color = Color.Red)
         } else if (dailyStatistics.isNotEmpty()) {
-            Button(onClick = { showDatePicker = true }) {
-                Text(text = "日付を選択")
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(text = "選択された日付：${selectedDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))}")
-            if (selectedApps.isNotEmpty()) {
-                AppUsageChart(appUsageData = selectedApps)
-            }
-
-            if (showDatePicker) {
-                val context = LocalContext.current
-                android.app.DatePickerDialog(
-                    context,
-                    { _, year, month, dayOfMonth ->
-                        val newDate = LocalDate.of(year, month + 1, dayOfMonth)
-                        selectedDate = newDate
-                        selectedApps =
-                            dailyStatistics.firstOrNull { it.date == newDate.toString() }?.apps?.sortedByDescending { it.totalTimeInForeground }
-                                ?: emptyList()
-                        showDatePicker = false
-                    },
-                    selectedDate.year,
-                    selectedDate.monthValue - 1,
-                    selectedDate.dayOfMonth
-                ).show()
-            }
+            UsageStatisticsScreen(dailyStatistics)
         }
     }
 }
