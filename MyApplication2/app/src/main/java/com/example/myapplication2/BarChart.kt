@@ -2,10 +2,15 @@ package com.example.myapplication2
 
 import android.graphics.Paint
 import android.view.MotionEvent
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,17 +23,24 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
+import androidx.compose.ui.window.Dialog
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -51,8 +63,22 @@ val colors = listOf(
     Color(0xFF3700B3), // Deep Purple
     Color(0xFF018786), // Dark Teal
     Color(0xFF03A9F4), // Light Blue
-    Color(0xFF2196F3)  // Blue
+    Color(0xFF2196F3), // Blue
+    Color(0xFF8BC34A), // Light Green
+    Color(0xFFCDDC39), // Lime
+    Color(0xFFFFC107), // Amber
+    Color(0xFFFF5722), // Deep Orange
+    Color(0xFFFF9800), // Orange
+    Color(0xFF9C27B0), // Purple
+    Color(0xFFE91E63), // Pink
+    Color(0xFFF44336), // Red
+    Color(0xFF009688), // Green
+    Color(0xFF795548), // Brown
+    Color(0xFF607D8B), // Blue Grey
+    Color(0xFF9E9E9E), // Grey
+    Color(0xFFFFEB3B)  // Yellow
 )
+
 
 data class AppUsageData(
     val packageName: String,
@@ -160,12 +186,15 @@ fun calculatePeriodUsage(dailyStatistics: List<DailyStatistics>, startDate: Loca
 fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
-    val periods = listOf("日毎", "期間指定")
+    val periods = listOf("日付指定", "期間指定")
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showPeriodPicker by remember { mutableStateOf(false) }
     var periodStartDate by remember { mutableStateOf(LocalDate.now()) }
     var periodEndDate by remember { mutableStateOf(LocalDate.now()) }
+
+    var mainAppsCount by remember { mutableStateOf(5) }
+    var showDropdownDialog by remember { mutableStateOf(false) }
 
     val usageData by remember(dailyStatistics, selectedDate, periodStartDate, periodEndDate) {
         derivedStateOf {
@@ -177,11 +206,49 @@ fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
         }
     }
 
+    val (mainUsageData, otherUsageData) = getMainAndOtherUsageData(usageData, mainAppsCount)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        // ボタンを押してドロップダウンメニューを含むダイアログを表示
+        Button(
+            onClick = { showDropdownDialog = true },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(Color.Blue)
+        ) {
+            Text("表示する主要アプリの数を選択 : $mainAppsCount", color = Color.White)
+        }
+
+        if (showDropdownDialog) {
+            Dialog(onDismissRequest = { showDropdownDialog = false }) {
+                Surface(
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("主要アプリの数", style = MaterialTheme.typography.titleMedium)
+                        LazyColumn {
+                            items(20) { index ->
+                                val i = index + 1
+                                DropdownMenuItem(
+                                    text = { Text(i.toString(), style = MaterialTheme.typography.bodyLarge) },
+                                    onClick = {
+                                        mainAppsCount = i
+                                        showDropdownDialog = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         TabRow(
             selectedTabIndex = pagerState.currentPage,
             modifier = Modifier.fillMaxWidth()
@@ -199,71 +266,75 @@ fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
             }
         }
 
-        when (pagerState.currentPage) {
-            0 -> {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { selectedDate = selectedDate.minusDays(1) }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "前の日")
-                    }
-                    TextButton(onClick = { showDatePicker = true }) {
-                        Text("選択された日付: $selectedDate")
-                    }
-                    IconButton(onClick = { selectedDate = selectedDate.plusDays(1) }) {
-                        Icon(Icons.Default.ArrowForward, contentDescription = "次の日")
-                    }
-                }
-                if (showDatePicker) {
-                    DatePickerDialog(
-                        selectedDate = selectedDate,
-                        onDateSelected = { newDate ->
-                            selectedDate = newDate
-                            showDatePicker = false
-                        },
-                        onDismissRequest = { showDatePicker = false }
-                    )
-                }
-            }
-            1 -> {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextButton(onClick = { showPeriodPicker = true }) {
-                        Text("選択された期間: $periodStartDate 〜 $periodEndDate")
-                    }
-                }
-                if (showPeriodPicker) {
-                    PeriodPickerDialog(
-                        selectedStartDate = periodStartDate,
-                        selectedEndDate = periodEndDate,
-                        onStartDateSelected = { newDate ->
-                            periodStartDate = newDate
-                        },
-                        onEndDateSelected = { newDate ->
-                            periodEndDate = newDate
-                        },
-                        onConfirm = { showPeriodPicker = false },
-                        onDismissRequest = { showPeriodPicker = false }
-                    )
-                }
-            }
-        }
-
         HorizontalPager(
             count = periods.size,
             state = pagerState,
             modifier = Modifier.fillMaxSize()
         ) { page ->
-            AppUsageChart(appUsageData = usageData)
+            when (page) {
+                0 -> {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = { selectedDate = selectedDate.minusDays(1) }) {
+                                Icon(Icons.Default.ArrowBack, contentDescription = "前の日")
+                            }
+                            TextButton(onClick = { showDatePicker = true }) {
+                                Text("日付を選択 :  $selectedDate", color = Color.Blue)
+                            }
+                            IconButton(onClick = { selectedDate = selectedDate.plusDays(1) }) {
+                                Icon(Icons.Default.ArrowForward, contentDescription = "次の日")
+                            }
+                        }
+                        if (showDatePicker) {
+                            DatePickerDialog(
+                                selectedDate = selectedDate,
+                                onDateSelected = { newDate ->
+                                    selectedDate = newDate
+                                    showDatePicker = false
+                                },
+                                onDismissRequest = { showDatePicker = false }
+                            )
+                        }
+                        AppUsageChart(mainUsageData = mainUsageData, otherUsageData = otherUsageData)
+                    }
+                }
+                1 -> {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            TextButton(onClick = { showPeriodPicker = true }) {
+                                Text("期間を選択 :  $periodStartDate 〜 $periodEndDate", color = Color.Blue)
+                            }
+                        }
+                        if (showPeriodPicker) {
+                            PeriodPickerDialog(
+                                selectedStartDate = periodStartDate,
+                                selectedEndDate = periodEndDate,
+                                onStartDateSelected = { newDate ->
+                                    periodStartDate = newDate
+                                },
+                                onEndDateSelected = { newDate ->
+                                    periodEndDate = newDate
+                                },
+                                onConfirm = { showPeriodPicker = false },
+                                onDismissRequest = { showPeriodPicker = false }
+                            )
+                        }
+                        AppUsageChart(mainUsageData = mainUsageData, otherUsageData = otherUsageData)
+                    }
+                }
+            }
         }
     }
 }
 
 
 @Composable
-fun AppUsageChart(appUsageData: List<AppUsageData>) {
+fun AppUsageChart(mainUsageData: List<AppUsageData>, otherUsageData: AppUsageData?) {
     var showDialog by remember { mutableStateOf(false) }
-    var dialogText by remember { mutableStateOf("") }
+    var selectedAppUsageData by remember { mutableStateOf<AppUsageData?>(null) }
 
     // グラフの最大値を計算
-    val maxTime = appUsageData.maxOfOrNull { it.totalTimeInForeground } ?: 1L
+    val maxTime = mainUsageData.maxOfOrNull { it.totalTimeInForeground } ?: 1L
     val roundedMaxTime = roundToNearest3Hours(maxTime)
 
     LazyColumn(
@@ -278,7 +349,7 @@ fun AppUsageChart(appUsageData: List<AppUsageData>) {
                     .padding(8.dp)
             ) {
                 Text(
-                    text = "アプリ名",
+                    text = "アプリ",
                     modifier = Modifier.weight(0.2f),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -328,7 +399,7 @@ fun AppUsageChart(appUsageData: List<AppUsageData>) {
             }
         }
 
-        items(appUsageData) { data ->
+        items(mainUsageData) { data ->
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -339,7 +410,7 @@ fun AppUsageChart(appUsageData: List<AppUsageData>) {
                     modifier = Modifier
                         .weight(0.2f)
                         .clickable {
-                            dialogText = "${data.packageName}\n使用時間 : ${formatTime(data.totalTimeInForeground)}"
+                            selectedAppUsageData = data
                             showDialog = true
                         },
                     maxLines = 1,
@@ -351,7 +422,44 @@ fun AppUsageChart(appUsageData: List<AppUsageData>) {
                     modifier = Modifier
                         .weight(0.8f)
                         .height(24.dp)
+                        .clickable {
+                            selectedAppUsageData = data
+                            showDialog = true
+                        }
                 )
+            }
+        }
+
+        otherUsageData?.let { data ->
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    Text(
+                        text = "その他",
+                        modifier = Modifier
+                            .weight(0.2f)
+                            .clickable {
+                                selectedAppUsageData = data
+                                showDialog = true
+                            },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    BarChart(
+                        value = data.totalTimeInForeground,
+                        maxValue = roundedMaxTime,
+                        modifier = Modifier
+                            .weight(0.8f)
+                            .height(24.dp)
+                            .clickable {
+                                selectedAppUsageData = data
+                                showDialog = true
+                            }
+                    )
+                }
             }
         }
 
@@ -365,10 +473,14 @@ fun AppUsageChart(appUsageData: List<AppUsageData>) {
                     .padding(16.dp)
             ) {
                 PieChart(
-                    appUsageData = appUsageData,
+                    appUsageData = mainUsageData + listOfNotNull(otherUsageData),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(300.dp)
+                        .height(300.dp),
+                    onSegmentClick = { data ->
+                        selectedAppUsageData = data
+                        showDialog = true
+                    }
                 )
 
                 // 凡例を表示
@@ -377,7 +489,7 @@ fun AppUsageChart(appUsageData: List<AppUsageData>) {
                         .fillMaxWidth()
                         .padding(top = 16.dp)
                 ) {
-                    appUsageData.forEachIndexed { index, data ->
+                    mainUsageData.forEachIndexed { index, data ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.padding(4.dp)
@@ -388,70 +500,148 @@ fun AppUsageChart(appUsageData: List<AppUsageData>) {
                                     .background(colors[index % colors.size])
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = data.packageName,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                            Column {
+                                Text(
+                                    text = data.packageName,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = formatTime(data.totalTimeInForeground),
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                        }
+                    }
+                    otherUsageData?.let { data ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(4.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .background(colors[mainUsageData.size % colors.size])
                             )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                Text(
+                                    text = "その他",
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = formatTime(data.totalTimeInForeground),
+                                    fontSize = 12.sp,
+                                    color = Color.Gray
+                                )
+                            }
                         }
                     }
                 }
             }
         }
+    }
 
-        if (showDialog) {
-            item {
-                AlertDialog(
-                    onDismissRequest = { showDialog = false },
-                    confirmButton = {
-                        TextButton(onClick = { showDialog = false }) {
-                            Text("OK")
-                        }
-                    },
-                    text = { Text(dialogText) }
-                )
+    if (showDialog && selectedAppUsageData != null) {
+        AppDetailDialog(
+            appUsageData = selectedAppUsageData!!,
+            onDismissRequest = {
+                showDialog = false
+                selectedAppUsageData = null
+            }
+        )
+    }
+}
+
+@Composable
+fun AppDetailDialog(
+    appUsageData: AppUsageData,
+    onDismissRequest: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("閉じる")
+            }
+        },
+        title = {
+            Text("詳細", style = MaterialTheme.typography.headlineSmall)
+        },
+        text = {
+            Column {
+                Text("アプリ名 : ${appUsageData.packageName}", style = MaterialTheme.typography.bodySmall)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("使用時間 : ${formatTime(appUsageData.totalTimeInForeground)}", style = MaterialTheme.typography.bodySmall)
             }
         }
-    }
+    )
 }
 
 
 @Composable
 fun BarChart(value: Long, maxValue: Long, modifier: Modifier = Modifier) {
+    val animatedValue by animateFloatAsState(
+        targetValue = value.toFloat() / maxValue,
+        animationSpec = tween(durationMillis = 1000), label = ""
+    )
+
     Box(modifier = modifier) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            drawIntoCanvas { canvas ->
-                val barWidth = size.width * (value.toFloat() / maxValue.toFloat())
-                val paint = Paint().apply {
-                    color = Color.Blue.toArgb()
-                }
-                val widthWithPadding = barWidth
-                canvas.nativeCanvas.drawRect(0f, 0f, widthWithPadding, size.height, paint)
-            }
+            val barWidth = size.width * animatedValue
+
+            drawRect(
+                color = Color(0xFF4CAF50), // 視認性の良い緑色
+                topLeft = Offset(0f, 0f),
+                size = Size(barWidth, size.height)
+            )
         }
     }
 }
 
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PieChart(
     appUsageData: List<AppUsageData>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSegmentClick: (AppUsageData) -> Unit
 ) {
     val totalUsageTime = appUsageData.sumOf { it.totalTimeInForeground }
     val sweepAngles = appUsageData.map { 360f * (it.totalTimeInForeground / totalUsageTime.toFloat()) }
     val percentages = appUsageData.map { (it.totalTimeInForeground / totalUsageTime.toFloat() * 100).toInt() }
 
-    Box(modifier = modifier) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            var startAngle = -90f  // 12時方向をスタートに設定
+    val animatedSweepAngles = sweepAngles.map { angle ->
+        animateFloatAsState(targetValue = angle, animationSpec = tween(durationMillis = 1000)).value
+    }
 
-            sweepAngles.forEachIndexed { index, sweepAngle ->
-                val sweepAngleRad = Math.toRadians(sweepAngle.toDouble() / 2.0 + startAngle.toDouble()).toFloat()
-                val radius = size.minDimension / 2 / 1.5f  // 円グラフの半径
-                val x = size.width / 2 + cos(sweepAngleRad) * radius
-                val y = size.height / 2 + sin(sweepAngleRad) * radius
+    var canvasSize by remember { mutableStateOf(androidx.compose.ui.geometry.Size.Zero) }
 
+    Box(modifier = modifier.pointerInput(Unit) {
+        detectTapGestures { offset ->
+            val x = offset.x - canvasSize.width / 2
+            val y = offset.y - canvasSize.height / 2
+            val touchAngle = (Math.toDegrees(Math.atan2(y.toDouble(), x.toDouble())) + 360) % 360
+
+            var startAngle = -90f
+            for ((index, sweepAngle) in animatedSweepAngles.withIndex()) {
+                val endAngle = startAngle + sweepAngle
+                if (touchAngle in startAngle..endAngle || (startAngle < 0 && touchAngle in (360 + startAngle)..360.0f) || (endAngle > 360 && touchAngle in 0.0..((endAngle - 360).toDouble()))) {
+                    onSegmentClick(appUsageData[index])
+                    break
+                }
+                startAngle = endAngle
+            }
+        }
+    }) {
+        Canvas(modifier = Modifier.fillMaxSize().onSizeChanged { size ->
+            canvasSize = size.toSize()
+        }) {
+            var startAngle = -90f
+
+            animatedSweepAngles.forEachIndexed { index, sweepAngle ->
                 drawArc(
                     color = colors[index % colors.size],
                     startAngle = startAngle,
@@ -459,15 +649,20 @@ fun PieChart(
                     useCenter = true
                 )
 
+                val labelAngle = Math.toRadians((startAngle + sweepAngle / 2).toDouble()).toFloat()
+                val radius = size.minDimension / 2 / 1.5f
+                val x = size.width / 2 + cos(labelAngle) * radius
+                val y = size.height / 2 + sin(labelAngle) * radius
+
                 if (percentages[index] > 10) {
                     drawContext.canvas.nativeCanvas.drawText(
                         "${percentages[index]}%",
                         x,
                         y,
                         Paint().apply {
-                            color = Color.Black.toArgb()
+                            color = Color.White.toArgb()
                             textAlign = Paint.Align.CENTER
-                            textSize = 40f  // フォントサイズを40fに設定
+                            textSize = 40f
                         }
                     )
                 }
@@ -487,6 +682,37 @@ fun PieChart(
     }
 }
 
+
+
+fun getMainAndOtherUsageData(usageData: List<AppUsageData>, mainAppsCount: Int): Pair<List<AppUsageData>, AppUsageData?> {
+    val mainUsageData = usageData.take(mainAppsCount)
+    val otherUsageData = if (usageData.size > mainAppsCount) {
+        val otherTotalTime = usageData.drop(mainAppsCount).sumOf { it.totalTimeInForeground }
+        AppUsageData("その他", otherTotalTime)
+    } else {
+        null
+    }
+    return Pair(mainUsageData, otherUsageData)
+}
+
+
+@Preview
+@Composable
+fun UsageStatisticsScreenPreview() {
+    val dailyStatistics = listOf(
+        DailyStatistics(
+            "2024-01-01",
+            listOf(
+                AppUsageData("App1", 5000L),
+                AppUsageData("App2", 3000L),
+                AppUsageData("App3", 2000L),
+                AppUsageData("App4", 1000L),
+                AppUsageData("App5", 500L)
+            )
+        )
+    )
+    UsageStatisticsScreen(dailyStatistics)
+}
 
 //「年毎」「月毎」「週毎」「日毎」「期間指定」の五種類バージョン
 
