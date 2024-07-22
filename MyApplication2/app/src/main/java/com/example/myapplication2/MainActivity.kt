@@ -22,7 +22,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 private const val TAG = "MainActivity222"
 
-
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var UploadStatictics: UploadStatictics
@@ -54,7 +53,7 @@ class MainActivity : ComponentActivity() {
 //                      ListFriendsUI()
 //                      FileUploadScreen()
                       NavGraph()
-//                      profile()
+//                      Profile()
 
 
 //                    旧：統計情報取得アプリ用

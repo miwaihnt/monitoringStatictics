@@ -1,10 +1,8 @@
 package com.example.myapplication2.View2
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -18,22 +16,29 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.myapplication2.ViewModel.CurrentUserViewModel
-import com.example.myapplication2.ViewModel.LoginViewModel
+import com.example.myapplication2.ViewModel.UserResistrationViewModel
 
 @Composable
-fun LogInView(
-    loginViewModel: LoginViewModel = viewModel(),
-    currentUserViewModel: CurrentUserViewModel = viewModel(),
-    navController: NavController) {
-
+fun UserRegistrate(
+    navController: NavController,
+    UserResistrationViewModel: UserResistrationViewModel = viewModel()
+) {
+    var userName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var passoword by remember { mutableStateOf("") }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+
+        TextField(
+            value = userName,
+            onValueChange = { userName = it },
+            label = { Text("ユーザ名") },
+            modifier = Modifier.padding(16.dp)
+        )
+
         TextField(
             value = email,
             onValueChange = { email = it },
@@ -42,31 +47,18 @@ fun LogInView(
         )
 
         TextField(
-            value = password,
-            onValueChange = { password = it },
+            value = passoword,
+            onValueChange = { passoword = it },
             label = { Text("Password") },
             modifier = Modifier.padding(16.dp)
         )
 
-        Button(
-            onClick = {
-                loginViewModel.logIn(email, password, navController)
-            },
-            modifier = Modifier
-                .padding(16.dp)
-                .width(200.dp)
-        ) {
-            Text(text = "Login")
+        Button(onClick = {
+            UserResistrationViewModel.AuthUserRegistration(userName,email,passoword)
+            navController.navigate("LogInView")
+        }) {
+            Text(text = "新規登録")
         }
-        Button(
-            onClick = {
-               navController.navigate("UserRegistrate")
-            },
-            modifier = Modifier
-                .padding(16.dp)
-                .width(200.dp)
-        ) {
-            Text(text = "登録")
-        }
+
     }
 }

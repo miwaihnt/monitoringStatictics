@@ -26,7 +26,7 @@ class LoginViewModel @Inject constructor (
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    navController.navigate("Profile")
+                    navController.navigate("Home")
                     Log.d("performLogin", "Succcess")
                 } else {
                     Log.d("performLogin", "Failed")

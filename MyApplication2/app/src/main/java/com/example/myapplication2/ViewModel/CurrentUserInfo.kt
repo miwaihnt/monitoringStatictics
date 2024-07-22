@@ -20,6 +20,9 @@ class CurrentUserViewModel @Inject constructor(
     private val _user = MutableStateFlow<AllUser>(AllUser("","","", "",))
     val user = _user.asStateFlow()
 
+    private val _userNameState = MutableStateFlow<String>("")
+    val userNameState = _userNameState.asStateFlow()
+
 
     fun currentUserInfo() {
         val uid = auth.currentUser?.uid
@@ -49,9 +52,22 @@ class CurrentUserViewModel @Inject constructor(
         }
     }
 
-    fun userImageInfo () {
 
+// user名の変更
+    fun updateUserName (newUserName:String) {
+        val uid = auth.currentUser?.uid
+        if(uid !== null) {
+            val docRef= db.collection("User").document(uid)
+                docRef.update("userName",newUserName)
+                .addOnSuccessListener {
+                    _userNameState.value = newUserName
+                    Log.d("changeUserName","changeUserName:is succecc,uid:$uid")
+                }
+                .addOnFailureListener {
+                    Log.d("changeUserName","changeUserName:is fail docRef:$docRef,uid:$uid")
+                }
+        } else {
+          Log.e("changeUserName","document is null")
+        }
     }
-
-
 }

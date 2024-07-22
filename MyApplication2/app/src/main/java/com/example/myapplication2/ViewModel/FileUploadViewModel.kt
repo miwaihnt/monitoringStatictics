@@ -35,10 +35,13 @@ class FileUploadViewModel @Inject constructor(
         val storageRef = storage.reference
         val imageRef = storageRef.child("profile/${uid}.jpg")
         val uploadTask = imageRef.putFile(uri)
+        Log.d("uploadImage","image uri :${_imageUri.value}")
         uploadTask.addOnSuccessListener {
             imageRef.downloadUrl.addOnSuccessListener {downloadUrl ->
                 _uploadResult.value = downloadUrl.toString()
                 Log.d("FileUploadViewModel","url:${_uploadResult.value}")
+                Log.d("FileUploadViewModel","url:${_uploadResult}")
+                Log.d("FileUploadViewModel","url:$uploadResult")
                 uploadImageFirestore()
             }
         }.addOnFailureListener{ Exception ->

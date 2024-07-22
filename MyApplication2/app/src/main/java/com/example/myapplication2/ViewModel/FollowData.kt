@@ -26,6 +26,7 @@ class FollowData @Inject constructor (
 
     fun fetchFollow() {
         val authUser = auth.currentUser
+        Log.d("ListFriends","authUser:${authUser?.uid}")
         viewModelScope.launch {
             try {
                 if (authUser !== null) {
