@@ -36,20 +36,23 @@ fun StatisticsInfo(navController: NavController, getStatistics: getStatistics) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize()
     ) {
-        Button(onClick = {
-            if (currentUser != null) {
-                getStatistics.getStatisticsInfo(currentUser.uid) { data ->
-                    dailyStatistics = data
-                    errorMessage = if (data.isEmpty()) "No data found" else null
+// 統計取得ボタンの表示を条件付きにする
+        if (dailyStatistics.isEmpty() && errorMessage == null) {
+            Button(onClick = {
+                if (currentUser != null) {
+                    getStatistics.getStatisticsInfo(currentUser.uid) { data ->
+                        dailyStatistics = data
+                        errorMessage = if (data.isEmpty()) "No data found" else null
+                    }
+                } else {
+                    errorMessage = "User is not logged in"
                 }
-            } else {
-                errorMessage = "User is not logged in"
+            }) {
+                Text(text = "統計取得")
             }
-        }) {
-            Text(text = "統計取得")
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         if (errorMessage != null) {
             Text(text = "Error: $errorMessage", color = Color.Red)

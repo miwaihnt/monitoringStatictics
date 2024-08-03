@@ -52,13 +52,13 @@ class MainActivity : ComponentActivity() {
                         //新：Hiltテスト用
 //                      ListFriendsUI()
 //                      FileUploadScreen()
-                      NavGraph()
+//                      NavGraph()
 //                      profile()
 
 //                    旧：統計情報取得アプリ用
-//                    val usageStatsClass = UsageStatsClass(this)
-//                    val usageStats = usageStatsClass.readOneDayUsageStats()
-//                    DisplayNav(userRegistration,auth,dbInfoGet,dbAddFollowData,FirebaseFirestore,usageStats,getStatistics,)
+                   val usageStatsClass = UsageStatsClass(this)
+                   val usageStats = usageStatsClass.readOneDayUsageStats()
+                   DisplayNav(userRegistration,auth,dbInfoGet,dbAddFollowData,FirebaseFirestore,usageStats,getStatistics,)
                 }
             }
         }
