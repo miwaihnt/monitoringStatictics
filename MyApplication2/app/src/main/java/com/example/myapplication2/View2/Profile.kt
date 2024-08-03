@@ -35,8 +35,6 @@ fun Profile(
     var showDialog by remember { mutableStateOf(false) }
     var newUserName by remember { mutableStateOf("") }
 
-
-
     //imageの変更
     val imageUri = fileUploadViewModel.imageUri
     val imagePickerLauncer = rememberLauncherForActivityResult(

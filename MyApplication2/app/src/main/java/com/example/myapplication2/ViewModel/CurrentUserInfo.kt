@@ -57,7 +57,7 @@ class CurrentUserViewModel @Inject constructor(
     fun updateUserName (newUserName:String) {
         val uid = auth.currentUser?.uid
         if(uid !== null) {
-            val docRef= db.collection("User").document(uid)
+            val docRef = db.collection("User").document(uid)
                 docRef.update("userName",newUserName)
                 .addOnSuccessListener {
                     _userNameState.value = newUserName

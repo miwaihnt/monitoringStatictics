@@ -25,7 +25,8 @@ import com.example.myapplication2.ViewModel.LoginViewModel
 fun LogInView(
     loginViewModel: LoginViewModel = viewModel(),
     currentUserViewModel: CurrentUserViewModel = viewModel(),
-    navController: NavController) {
+    navController: NavController
+) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -60,7 +61,7 @@ fun LogInView(
         }
         Button(
             onClick = {
-               navController.navigate("UserRegistrate")
+                navController.navigate("UserRegistrate")
             },
             modifier = Modifier
                 .padding(16.dp)

@@ -97,6 +97,7 @@ dependencies {
 
     // add new dependencies (Alice)
     implementation("com.google.accompanist:accompanist-pager:0.23.1")
+//    implementation("androidx.compose.material3:material3-android:1.2.1")
     //Junit
     testImplementation("junit:junit:4.13.2")
     testImplementation("com.google.truth:truth:1.1.3")
@@ -134,6 +135,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
     implementation("com.squareup.okhttp3:okhttp:4.9.2")
     implementation ("com.squareup.okhttp3:logging-interceptor:4.9.2")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

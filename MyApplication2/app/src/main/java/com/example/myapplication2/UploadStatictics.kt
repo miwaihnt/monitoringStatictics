@@ -79,6 +79,7 @@ class UploadStatictics(val db : FirebaseFirestore) {
                 UserdocRef.collection("dailyStatistics")
                     .document("$FormatDate")
                     .set(data)
+                Log.d("uploadStatisctics","succeccful is date:$data")
 
 //                db.collection("statistics")
 //                    .document("$uid")

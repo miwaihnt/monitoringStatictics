@@ -15,6 +15,7 @@ import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -177,7 +178,7 @@ fun calculatePeriodUsage(dailyStatistics: List<DailyStatistics>, startDate: Loca
                 usages.sumOf { it.totalTimeInForeground }
             )
         }
-        .sortedByDescending { it.totalTimeInForeground } // 降順にソート
+        .sortedByDescending { it.totalTimeInForeground }  // 降順にソート
 }
 
 

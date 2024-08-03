@@ -17,6 +17,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.myapplication2.ViewModel.CurrentUserViewModel
 import com.example.myapplication2.ViewModel.FollowData
 import com.example.myapplication2.ViewModel.LoginViewModel
+//import com.example.myapplication2.ViewModel.SerchBarViewModel
 import com.example.myapplication2.ViewModel.UserResistrationViewModel
 
 @Composable
@@ -51,7 +52,9 @@ fun NavGraph() {
 
         composable(route = "Home") {
             val FollowDataViewModel = hiltViewModel<FollowData>()
+//            val SerchBarViewModel = hiltViewModel<SerchBarViewModel>()
             Home(navController = navController,FollowDataViewModel = FollowDataViewModel)
+//            Home(SerchBarViewModel = SerchBarViewModel)
         }
         composable(route = "ListFriendsUI") {
             ListFriendsUI()
