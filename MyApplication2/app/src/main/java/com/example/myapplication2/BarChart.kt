@@ -6,8 +6,10 @@ import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -15,7 +17,6 @@ import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -44,15 +45,18 @@ import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.window.Dialog
 import com.google.accompanist.pager.*
 import kotlinx.coroutines.launch
+import okio.blackholeSink
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.time.temporal.ChronoField
 import java.time.temporal.TemporalAdjusters
 import java.time.temporal.WeekFields
 import java.util.Locale
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 
@@ -103,52 +107,17 @@ fun roundToNearest3Hours(timeInMillis: Long): Long {
     return ((timeInMillis + threeHoursInMillis - 1) / threeHoursInMillis) * threeHoursInMillis
 }
 
-fun calculateYearlyUsage(dailyStatistics: List<DailyStatistics>, selectedYear: String): List<AppUsageData> {
-    return dailyStatistics
-        .filter { it.date.startsWith(selectedYear) }
-        .flatMap { it.apps }
-        .groupBy { it.packageName }
-        .map { (packageName, usages) ->
-            AppUsageData(
-                packageName,
-                usages.sumOf { it.totalTimeInForeground }
-            )
-        }
-        .sortedByDescending { it.totalTimeInForeground } // 降順にソート
+fun LocalDate.formatWithDayOfWeek(): String {
+    val dayOfWeek = this.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.JAPANESE).substring(0, 1)
+    val formatter = DateTimeFormatter.ofPattern("yyyy年M月d日")
+    return "${this.format(formatter)} ($dayOfWeek)"
 }
 
-fun calculateMonthlyUsage(dailyStatistics: List<DailyStatistics>, selectedMonth: String): List<AppUsageData> {
-    return dailyStatistics
-        .filter { it.date.startsWith(selectedMonth) }
-        .flatMap { it.apps }
-        .groupBy { it.packageName }
-        .map { (packageName, usages) ->
-            AppUsageData(
-                packageName,
-                usages.sumOf { it.totalTimeInForeground }
-            )
-        }
-        .sortedByDescending { it.totalTimeInForeground } // 降順にソート
+fun LocalDate.formatWithoutDayOfWeek(): String {
+    val formatter = DateTimeFormatter.ofPattern("yyyy年M月d日")
+    return this.format(formatter)
 }
 
-fun calculateWeeklyUsage(dailyStatistics: List<DailyStatistics>, selectedWeek: String): List<AppUsageData> {
-    val weekFields = WeekFields.of(Locale.getDefault())
-    return dailyStatistics
-        .filter {
-            val date = LocalDate.parse(it.date)
-            val weekOfYear = date.get(weekFields.weekOfWeekBasedYear())
-            selectedWeek == "${date.year}-W$weekOfYear"
-        }
-        .flatMap { it.apps }
-        .groupBy { it.packageName }
-        .map { (packageName, usages) ->
-            AppUsageData(
-                packageName,
-                usages.sumOf { it.totalTimeInForeground }
-            )
-        }
-        .sortedByDescending { it.totalTimeInForeground } // 降順にソート
-}
 
 fun calculateDailyUsage(dailyStatistics: List<DailyStatistics>, selectedDate: String): List<AppUsageData> {
     return dailyStatistics
@@ -178,8 +147,9 @@ fun calculatePeriodUsage(dailyStatistics: List<DailyStatistics>, startDate: Loca
                 usages.sumOf { it.totalTimeInForeground }
             )
         }
-        .sortedByDescending { it.totalTimeInForeground }  // 降順にソート
+        .sortedByDescending { it.totalTimeInForeground } // 降順にソート
 }
+
 
 
 @OptIn(ExperimentalPagerApi::class)
@@ -197,7 +167,7 @@ fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
     var mainAppsCount by remember { mutableStateOf(5) }
     var showDropdownDialog by remember { mutableStateOf(false) }
 
-    val usageData by remember(dailyStatistics, selectedDate, periodStartDate, periodEndDate) {
+    val usageData by remember(dailyStatistics, selectedDate, periodStartDate, periodEndDate, pagerState.currentPage) {
         derivedStateOf {
             when (pagerState.currentPage) {
                 0 -> calculateDailyUsage(dailyStatistics, selectedDate.toString())
@@ -214,11 +184,12 @@ fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
         // ボタンを押してドロップダウンメニューを含むダイアログを表示
         Button(
             onClick = { showDropdownDialog = true },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(Color.Blue)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text("表示する主要アプリの数を選択 : $mainAppsCount", color = Color.White)
         }
@@ -234,7 +205,7 @@ fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text("主要アプリの数", style = MaterialTheme.typography.titleMedium)
                         LazyColumn {
-                            items(20) { index ->
+                            items(10) { index ->
                                 val i = index + 1
                                 DropdownMenuItem(
                                     text = { Text(i.toString(), style = MaterialTheme.typography.bodyLarge) },
@@ -250,9 +221,13 @@ fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
             }
         }
 
+        Spacer(modifier = Modifier.height(24.dp))
+
         TabRow(
             selectedTabIndex = pagerState.currentPage,
-            modifier = Modifier.fillMaxWidth()
+            containerColor = Color.hsl(300F, 0.1F, 0.9F),
+            modifier = Modifier
+                .fillMaxWidth()
         ) {
             periods.forEachIndexed { index, period ->
                 Tab(
@@ -267,6 +242,8 @@ fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
             }
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         HorizontalPager(
             count = periods.size,
             state = pagerState,
@@ -275,15 +252,35 @@ fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
             when (page) {
                 0 -> {
                     Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )  {
                             IconButton(onClick = { selectedDate = selectedDate.minusDays(1) }) {
                                 Icon(Icons.Default.ArrowBack, contentDescription = "前の日")
                             }
                             TextButton(onClick = { showDatePicker = true }) {
-                                Text("日付を選択 :  $selectedDate", color = Color.Blue)
+                                Text(
+                                    text = selectedDate.formatWithDayOfWeek(),
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontSize = 22.sp),
+                                    color = Color(0xFF3700B3)
+                                )
                             }
-                            IconButton(onClick = { selectedDate = selectedDate.plusDays(1) }) {
-                                Icon(Icons.Default.ArrowForward, contentDescription = "次の日")
+                            // 今日の日付ではない場合のみ右矢印を表示
+                            if (selectedDate != LocalDate.now()) {
+                                IconButton(onClick = { selectedDate = selectedDate.plusDays(1) }) {
+                                    Icon(Icons.Default.ArrowForward, contentDescription = "次の日")
+                                }
+                            }else {
+                                // スペースを保持するための透明なアイコン
+                                IconButton(onClick = {}, enabled = false) {
+                                    Icon(
+                                        imageVector = Icons.Default.ArrowForward,
+                                        contentDescription = null,
+                                        tint = Color.Transparent
+                                    )
+                                }
                             }
                         }
                         if (showDatePicker) {
@@ -296,14 +293,23 @@ fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
                                 onDismissRequest = { showDatePicker = false }
                             )
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
                         AppUsageChart(mainUsageData = mainUsageData, otherUsageData = otherUsageData)
                     }
                 }
                 1 -> {
                     Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             TextButton(onClick = { showPeriodPicker = true }) {
-                                Text("期間を選択 :  $periodStartDate 〜 $periodEndDate", color = Color.Blue)
+                                Text(
+                                    text = "${periodStartDate.formatWithoutDayOfWeek()} 〜 ${periodEndDate.formatWithoutDayOfWeek()}",
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontSize = 22.sp),
+                                    color = Color(0xFF3700B3)
+                                )
                             }
                         }
                         if (showPeriodPicker) {
@@ -320,6 +326,7 @@ fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
                                 onDismissRequest = { showPeriodPicker = false }
                             )
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
                         AppUsageChart(mainUsageData = mainUsageData, otherUsageData = otherUsageData)
                     }
                 }
@@ -344,6 +351,100 @@ fun AppUsageChart(mainUsageData: List<AppUsageData>, otherUsageData: AppUsageDat
             .fillMaxSize()
     ) {
         item {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = Color.hsl(300F, 0.1F, 0.95F))
+                    .border(BorderStroke(2.dp, Color.Black)) // 枠線を追加
+            ) {
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // 円グラフを表示する部分
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    PieChart(
+                        appUsageData = mainUsageData + listOfNotNull(otherUsageData),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(300.dp),
+                        onSegmentClick = { data ->
+                            selectedAppUsageData = data
+                            showDialog = false
+                        }
+                    )
+
+                    // 凡例を表示
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp)
+                    ) {
+                        mainUsageData.forEachIndexed { index, data ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(4.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .background(colors[index % colors.size])
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text(
+                                        text = data.packageName,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = formatTime(data.totalTimeInForeground),
+                                        fontSize = 12.sp,
+                                        color = Color.DarkGray
+                                    )
+                                }
+                            }
+                        }
+                        otherUsageData?.let { data ->
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(4.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .background(colors[mainUsageData.size % colors.size])
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column {
+                                    Text(
+                                        text = "その他",
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = formatTime(data.totalTimeInForeground),
+                                        fontSize = 12.sp,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+
+
+        item {
+
+            Spacer(modifier = Modifier.height(32.dp))
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -363,14 +464,16 @@ fun AppUsageChart(mainUsageData: List<AppUsageData>, otherUsageData: AppUsageDat
                 )
             }
 
-            Box(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Canvas(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(40.dp)
                 ) {
                     val startX = size.width * 0.2f + 4.dp.toPx()
-                    val endX = size.width
+                    val endX = size.width - 8.dp.toPx()
                     val segmentWidth = (endX - startX) / 3
 
                     drawLine(
@@ -464,85 +567,6 @@ fun AppUsageChart(mainUsageData: List<AppUsageData>, otherUsageData: AppUsageDat
             }
         }
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // 円グラフを表示する部分
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                PieChart(
-                    appUsageData = mainUsageData + listOfNotNull(otherUsageData),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(300.dp),
-                    onSegmentClick = { data ->
-                        selectedAppUsageData = data
-                        showDialog = true
-                    }
-                )
-
-                // 凡例を表示
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp)
-                ) {
-                    mainUsageData.forEachIndexed { index, data ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(4.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .background(colors[index % colors.size])
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Column {
-                                Text(
-                                    text = data.packageName,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = formatTime(data.totalTimeInForeground),
-                                    fontSize = 12.sp,
-                                    color = Color.Gray
-                                )
-                            }
-                        }
-                    }
-                    otherUsageData?.let { data ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(4.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .background(colors[mainUsageData.size % colors.size])
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Column {
-                                Text(
-                                    text = "その他",
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = formatTime(data.totalTimeInForeground),
-                                    fontSize = 12.sp,
-                                    color = Color.Gray
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     if (showDialog && selectedAppUsageData != null) {
@@ -612,7 +636,15 @@ fun PieChart(
 ) {
     val totalUsageTime = appUsageData.sumOf { it.totalTimeInForeground }
     val sweepAngles = appUsageData.map { 360f * (it.totalTimeInForeground / totalUsageTime.toFloat()) }
-    val percentages = appUsageData.map { (it.totalTimeInForeground / totalUsageTime.toFloat() * 100).toInt() }
+    val percentages = appUsageData.map { ((it.totalTimeInForeground / totalUsageTime.toFloat()) * 100).roundToInt() }
+
+
+    // 調整して100%にする
+    val adjustedPercentages = percentages.toMutableList()
+    val totalPercentage = percentages.sum()
+    if (adjustedPercentages.isNotEmpty() && totalPercentage != 100) {
+        adjustedPercentages[adjustedPercentages.size - 1] += (100 - totalPercentage)
+    }
 
     val animatedSweepAngles = sweepAngles.map { angle ->
         animateFloatAsState(targetValue = angle, animationSpec = tween(durationMillis = 1000)).value
@@ -655,9 +687,9 @@ fun PieChart(
                 val x = size.width / 2 + cos(labelAngle) * radius
                 val y = size.height / 2 + sin(labelAngle) * radius
 
-                if (percentages[index] > 10) {
+                if (adjustedPercentages[index] > 10) {
                     drawContext.canvas.nativeCanvas.drawText(
-                        "${percentages[index]}%",
+                        "${adjustedPercentages[index]}%",
                         x,
                         y,
                         Paint().apply {
@@ -682,7 +714,6 @@ fun PieChart(
         }
     }
 }
-
 
 
 fun getMainAndOtherUsageData(usageData: List<AppUsageData>, mainAppsCount: Int): Pair<List<AppUsageData>, AppUsageData?> {
@@ -715,181 +746,3 @@ fun UsageStatisticsScreenPreview() {
     UsageStatisticsScreen(dailyStatistics)
 }
 
-//「年毎」「月毎」「週毎」「日毎」「期間指定」の五種類バージョン
-
-//  @OptIn(ExperimentalPagerApi::class)
-//  @Composable
-//
-//  fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
-//      val pagerState = rememberPagerState()
-//      val coroutineScope = rememberCoroutineScope()
-//      val periods = listOf("年毎", "月毎", "週毎", "日毎", "期間指定")
-//      var selectedYear by remember { mutableStateOf(LocalDate.now().year.toString()) }
-//      var selectedMonth by remember { mutableStateOf(YearMonth.now()) }
-//      var selectedWeek by remember {
-//          mutableStateOf(Pair(getCurrentWeekValue(LocalDate.now()), getCurrentWeekLabel(LocalDate.now())))
-//      }
-//      var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-//      var showYearPicker by remember { mutableStateOf(false) }
-//      var showMonthPicker by remember { mutableStateOf(false) }
-//      var showWeekPicker by remember { mutableStateOf(false) }
-//      var showDatePicker by remember { mutableStateOf(false) }
-//      var showPeriodPicker by remember { mutableStateOf(false) }
-//      var periodStartDate by remember { mutableStateOf(LocalDate.now()) }
-//      var periodEndDate by remember { mutableStateOf(LocalDate.now()) }
-//
-//      val usageData by remember {
-//          derivedStateOf {
-//              when (pagerState.currentPage) {
-//                  0 -> calculateYearlyUsage(dailyStatistics, selectedYear)
-//                  1 -> calculateMonthlyUsage(dailyStatistics, selectedMonth.toString())
-//                  2 -> calculateWeeklyUsage(dailyStatistics, selectedWeek.first)
-//                  3 -> calculateDailyUsage(dailyStatistics, selectedDate.toString())
-//                  4 -> calculatePeriodUsage(dailyStatistics, periodStartDate, periodEndDate)
-//                  else -> calculateDailyUsage(dailyStatistics, selectedDate.toString())
-//              }
-//          }
-//      }
-//
-//      Column(
-//          modifier = Modifier
-//              .fillMaxSize()
-//              .padding(16.dp)
-//      ) {
-//          TabRow(
-//              selectedTabIndex = pagerState.currentPage,
-//              modifier = Modifier.fillMaxWidth()
-//          ) {
-//              periods.forEachIndexed { index, period ->
-//                  Tab(
-//                      text = { Text(period) },
-//                      selected = pagerState.currentPage == index,
-//                      onClick = {
-//                          coroutineScope.launch {
-//                              pagerState.scrollToPage(index)
-//                          }
-//                      }
-//                  )
-//              }
-//          }
-//
-//          when (pagerState.currentPage) {
-//              0 -> {
-//                  Row(verticalAlignment = Alignment.CenterVertically) {
-//                      IconButton(onClick = { selectedYear = (selectedYear.toInt() - 1).toString() }) {
-//                          Icon(Icons.Default.ArrowBack, contentDescription = "前の年")
-//                      }
-//                      TextButton(onClick = { showYearPicker = true }) {
-//                          Text("選択された年: $selectedYear")
-//                      }
-//                      IconButton(onClick = { selectedYear = (selectedYear.toInt() + 1).toString() }) {
-//                          Icon(Icons.Default.ArrowForward, contentDescription = "次の年")
-//                      }
-//                  }
-//                  if (showYearPicker) {
-//                      YearPickerDialog(
-//                          selectedYear = selectedYear,
-//                          onYearSelected = { selectedYear = it },
-//                          onDismissRequest = { showYearPicker = false }
-//                      )
-//                  }
-//              }
-//              1 -> {
-//                  Row(verticalAlignment = Alignment.CenterVertically) {
-//                      IconButton(onClick = { selectedMonth = selectedMonth.minusMonths(1) }) {
-//                          Icon(Icons.Default.ArrowBack, contentDescription = "前の月")
-//                      }
-//                      TextButton(onClick = { showMonthPicker = true }) {
-//                          Text("選択された月: $selectedMonth")
-//                      }
-//                      IconButton(onClick = { selectedMonth = selectedMonth.plusMonths(1) }) {
-//                          Icon(Icons.Default.ArrowForward, contentDescription = "次の月")
-//                      }
-//                  }
-//                  if (showMonthPicker) {
-//                      MonthPickerDialog(
-//                          displayedYear = selectedMonth.year,
-//                          selectedMonth = selectedMonth,
-//                          onMonthSelected = { selectedMonth = it },
-//                          onDismissRequest = { showMonthPicker = false }
-//                      )
-//                  }
-//              }
-//              2 -> {
-//                  Row(verticalAlignment = Alignment.CenterVertically) {
-//                      IconButton(onClick = { selectedWeek = getPreviousWeek(selectedWeek.first) }) {
-//                          Icon(Icons.Default.ArrowBack, contentDescription = "前の週")
-//                      }
-//                      TextButton(onClick = { showWeekPicker = true }) {
-//                          Text("選択された週: ${selectedWeek.second}")
-//                      }
-//                      IconButton(onClick = { selectedWeek = getNextWeek(selectedWeek.first) }) {
-//                          Icon(Icons.Default.ArrowForward, contentDescription = "次の週")
-//                      }
-//                  }
-//                  if (showWeekPicker) {
-//                      WeekPickerDialog(
-//                          displayedYear = selectedWeek.first.substring(0, 4).toInt(), // 現在の週の年を表示年に設定
-//                          selectedWeek = selectedWeek,
-//                          onWeekSelected = { weekValue, weekLabel ->
-//                              selectedWeek = Pair(weekValue, weekLabel)
-//                          },
-//                          onDismissRequest = { showWeekPicker = false }
-//                      )
-//                  }
-//              }
-//              3 -> {
-//                  Row(verticalAlignment = Alignment.CenterVertically) {
-//                      IconButton(onClick = { selectedDate = selectedDate.minusDays(1) }) {
-//                          Icon(Icons.Default.ArrowBack, contentDescription = "前の日")
-//                      }
-//                      TextButton(onClick = { showDatePicker = true }) {
-//                          Text("選択された日付: $selectedDate")
-//                      }
-//                      IconButton(onClick = { selectedDate = selectedDate.plusDays(1) }) {
-//                          Icon(Icons.Default.ArrowForward, contentDescription = "次の日")
-//                      }
-//                  }
-//                  if (showDatePicker) {
-//                      DatePickerDialog(
-//                          selectedDate = selectedDate,
-//                          onDateSelected = { newDate ->
-//                              selectedDate = newDate
-//                              showDatePicker = false
-//                          },
-//                          onDismissRequest = { showDatePicker = false }
-//                      )
-//                  }
-//              }
-//              4 -> {
-//                  Row(verticalAlignment = Alignment.CenterVertically) {
-//                      TextButton(onClick = { showPeriodPicker = true }) {
-//                          Text("選択された期間: $periodStartDate 〜 $periodEndDate")
-//                      }
-//                  }
-//                  if (showPeriodPicker) {
-//                      PeriodPickerDialog(
-//                          selectedStartDate = periodStartDate,
-//                          selectedEndDate = periodEndDate,
-//                          onStartDateSelected = { newDate ->
-//                              periodStartDate = newDate
-//                          },
-//                          onEndDateSelected = { newDate ->
-//                              periodEndDate = newDate
-//                          },
-//                          onConfirm = { /* Confirm button logic if needed */ },
-//                          onDismissRequest = { showPeriodPicker = false }
-//                      )
-//                  }
-//              }
-//          }
-//
-//          HorizontalPager(
-//              count = periods.size,
-//              state = pagerState,
-//              modifier = Modifier.fillMaxSize()
-//          ) { page ->
-//              AppUsageChart(appUsageData = usageData)
-//          }
-//      }
-//  }
