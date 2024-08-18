@@ -61,6 +61,12 @@ fun DatePickerDialog(
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
+    // キャンセルリスナーを追加して、ダイアログがキャンセルされたときに `onDismissRequest` を呼び出す
+    datePickerDialog.setOnCancelListener {
+        onDismissRequest()
+    }
+
+
     DisposableEffect(Unit) {
         // コンポーネントが破棄されたときにダイアログを閉じる
         datePickerDialog.show()
