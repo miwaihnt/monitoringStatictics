@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
@@ -186,43 +187,6 @@ fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        // ボタンを押してドロップダウンメニューを含むダイアログを表示
-        Button(
-            onClick = { showDropdownDialog = true },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("表示する主要アプリの数を選択 : $mainAppsCount", color = Color.White)
-        }
-
-        if (showDropdownDialog) {
-            Dialog(onDismissRequest = { showDropdownDialog = false }) {
-                Surface(
-                    shape = MaterialTheme.shapes.medium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("主要アプリの数", style = MaterialTheme.typography.titleMedium)
-                        LazyColumn {
-                            items(10) { index ->
-                                val i = index + 1
-                                DropdownMenuItem(
-                                    text = { Text(i.toString(), style = MaterialTheme.typography.bodyLarge) },
-                                    onClick = {
-                                        mainAppsCount = i
-                                        showDropdownDialog = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
         TabRow(
             selectedTabIndex = pagerState.currentPage,
             containerColor = Color.hsl(300F, 0.1F, 0.9F),
@@ -293,6 +257,44 @@ fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
                                 onDismissRequest = { showDatePicker = false }
                             )
                         }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // ボタンを押してドロップダウンメニューを含むダイアログを表示
+                        Button(
+                            onClick = { showDropdownDialog = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("アプリ数を選択 : $mainAppsCount", color = Color.White)
+                        }
+
+                        if (showDropdownDialog) {
+                            Dialog(onDismissRequest = { showDropdownDialog = false }) {
+                                Surface(
+                                    shape = MaterialTheme.shapes.medium,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                ) {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        Text("表示する主要アプリの数", style = MaterialTheme.typography.titleMedium)
+                                        LazyColumn {
+                                            items(10) { index ->
+                                                val i = index + 1
+                                                DropdownMenuItem(
+                                                    text = { Text(i.toString(), style = MaterialTheme.typography.bodyLarge) },
+                                                    onClick = {
+                                                        mainAppsCount = i
+                                                        showDropdownDialog = false
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         Spacer(modifier = Modifier.height(8.dp))
                         AppUsageChart(mainUsageData = mainUsageData, otherUsageData = otherUsageData)
                     }
@@ -326,6 +328,44 @@ fun UsageStatisticsScreen(dailyStatistics: List<DailyStatistics>) {
                                 onDismissRequest = { showPeriodPicker = false }
                             )
                         }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // ボタンを押してドロップダウンメニューを含むダイアログを表示
+                        Button(
+                            onClick = { showDropdownDialog = true },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("アプリ数を選択 : $mainAppsCount", color = Color.White)
+                        }
+
+                        if (showDropdownDialog) {
+                            Dialog(onDismissRequest = { showDropdownDialog = false }) {
+                                Surface(
+                                    shape = MaterialTheme.shapes.medium,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                ) {
+                                    Column(modifier = Modifier.padding(16.dp)) {
+                                        Text("表示する主要アプリの数", style = MaterialTheme.typography.titleMedium)
+                                        LazyColumn {
+                                            items(10) { index ->
+                                                val i = index + 1
+                                                DropdownMenuItem(
+                                                    text = { Text(i.toString(), style = MaterialTheme.typography.bodyLarge) },
+                                                    onClick = {
+                                                        mainAppsCount = i
+                                                        showDropdownDialog = false
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         Spacer(modifier = Modifier.height(8.dp))
                         AppUsageChart(mainUsageData = mainUsageData, otherUsageData = otherUsageData)
                     }
@@ -440,133 +480,146 @@ fun AppUsageChart(mainUsageData: List<AppUsageData>, otherUsageData: AppUsageDat
             }
         }
 
-
         item {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Row(
+            // ここから枠線と背景色を適用
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
+                    .background(Color.Gray.copy(alpha = 0.15f)) // グレーの背景色
+                    .border(BorderStroke(2.dp, Color.Black)) // 黒い枠線
             ) {
-                Text(
-                    text = "アプリ",
-                    modifier = Modifier.weight(0.2f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = "使用時間",
-                    modifier = Modifier.weight(0.8f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+                Column(modifier = Modifier.padding(8.dp)) {
 
-            Box(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Canvas(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp)
-                ) {
-                    val startX = size.width * 0.2f + 4.dp.toPx()
-                    val endX = size.width - 8.dp.toPx()
-                    val segmentWidth = (endX - startX) / 3
-
-                    drawLine(
-                        color = Color.Black,
-                        start = Offset(startX, size.height / 2),
-                        end = Offset(endX, size.height / 2)
-                    )
-
-                    for (i in 0..3) {
-                        val x = startX + segmentWidth * i
-                        drawLine(
-                            color = Color.Gray,
-                            start = Offset(x, size.height / 2 - 10.dp.toPx()),
-                            end = Offset(x, size.height / 2 + 10.dp.toPx())
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Text(
+                            text = "アプリ",
+                            modifier = Modifier.weight(0.2f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
-                        drawContext.canvas.nativeCanvas.drawText(
-                            (i * roundedMaxTime / (3 * 60 * 60 * 1000)).toString(),
-                            x,
-                            size.height / 2 + 30f,
-                            Paint().apply {
-                                color = Color.Black.toArgb()
-                                textSize = 30f
-                            }
+                        Text(
+                            text = "使用時間",
+                            modifier = Modifier.weight(0.8f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
-                }
-            }
-        }
 
-        items(mainUsageData) { data ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Text(
-                    text = data.packageName,
-                    modifier = Modifier
-                        .weight(0.2f)
-                        .clickable {
-                            selectedAppUsageData = data
-                            showDialog = true
-                        },
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                BarChart(
-                    value = data.totalTimeInForeground,
-                    maxValue = roundedMaxTime,
-                    modifier = Modifier
-                        .weight(0.8f)
-                        .height(24.dp)
-                        .clickable {
-                            selectedAppUsageData = data
-                            showDialog = true
-                        }
-                )
-            }
-        }
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Canvas(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(40.dp)
+                        ) {
+                            val startX = size.width * 0.2f + 6.dp.toPx()
+                            val endX = size.width - 10.dp.toPx()
+                            val segmentWidth = (endX - startX) / 3
 
-        otherUsageData?.let { data ->
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    Text(
-                        text = "その他",
-                        modifier = Modifier
-                            .weight(0.2f)
-                            .clickable {
-                                selectedAppUsageData = data
-                                showDialog = true
-                            },
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    BarChart(
-                        value = data.totalTimeInForeground,
-                        maxValue = roundedMaxTime,
-                        modifier = Modifier
-                            .weight(0.8f)
-                            .height(24.dp)
-                            .clickable {
-                                selectedAppUsageData = data
-                                showDialog = true
+                            drawLine(
+                                color = Color.Black,
+                                start = Offset(startX, size.height / 2),
+                                end = Offset(endX, size.height / 2)
+                            )
+
+                            for (i in 0..3) {
+                                val x = startX + segmentWidth * i
+                                drawLine(
+                                    color = Color.Gray,
+                                    start = Offset(x, size.height / 2 - 10.dp.toPx()),
+                                    end = Offset(x, size.height / 2 + 10.dp.toPx())
+                                )
+                                drawContext.canvas.nativeCanvas.drawText(
+                                    (i * roundedMaxTime / (3 * 60 * 60 * 1000)).toString(),
+                                    x,
+                                    size.height / 2 + 30f,
+                                    Paint().apply {
+                                        color = Color.Black.toArgb()
+                                        textSize = 30f
+                                    }
+                                )
                             }
-                    )
+                        }
+                    }
+
+                    // アプリごとの棒グラフを表示
+                    mainUsageData.forEach { data ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        ) {
+                            Text(
+                                text = data.packageName,
+                                modifier = Modifier
+                                    .weight(0.2f)
+                                    .clickable {
+                                        selectedAppUsageData = data
+                                        showDialog = true
+                                    },
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            BarChart(
+                                value = data.totalTimeInForeground,
+                                maxValue = roundedMaxTime,
+                                modifier = Modifier
+                                    .weight(0.8f)
+                                    .height(24.dp)
+                                    .clickable {
+                                        selectedAppUsageData = data
+                                        showDialog = true
+                                    }
+                            )
+                        }
+                    }
+
+                    // その他のデータを表示
+                    otherUsageData?.let { data ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        ) {
+                            Text(
+                                text = "その他",
+                                modifier = Modifier
+                                    .weight(0.2f)
+                                    .clickable {
+                                        selectedAppUsageData = data
+                                        showDialog = true
+                                    },
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            BarChart(
+                                value = data.totalTimeInForeground,
+                                maxValue = roundedMaxTime,
+                                modifier = Modifier
+                                    .weight(0.8f)
+                                    .height(24.dp)
+                                    .clickable {
+                                        selectedAppUsageData = data
+                                        showDialog = true
+                                    }
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
-        }
 
+            Spacer(modifier = Modifier.height(16.dp)) // 枠線の下にスペースを追加
+        }
     }
 
     if (showDialog && selectedAppUsageData != null) {
@@ -579,6 +632,7 @@ fun AppUsageChart(mainUsageData: List<AppUsageData>, otherUsageData: AppUsageDat
         )
     }
 }
+
 
 @Composable
 fun AppDetailDialog(
@@ -607,7 +661,7 @@ fun AppDetailDialog(
 
 
 @Composable
-fun BarChart(value: Long, maxValue: Long, modifier: Modifier = Modifier) {
+fun BarChart(value: Long, maxValue: Long, modifier: Modifier = Modifier,) {
     val animatedValue by animateFloatAsState(
         targetValue = value.toFloat() / maxValue,
         animationSpec = tween(durationMillis = 1000), label = ""
@@ -618,10 +672,19 @@ fun BarChart(value: Long, maxValue: Long, modifier: Modifier = Modifier) {
             val barWidth = size.width * animatedValue
 
             drawRect(
-                color = Color(0xFF4CAF50), // 視認性の良い緑色
+                color = Color(0xFFFF9800), // オレンジ色
                 topLeft = Offset(0f, 0f),
-                size = Size(barWidth, size.height)
+                size = Size(barWidth, size.height),
             )
+
+            // 境界線を描画
+//         drawRect(
+//             color = Color.Gray, // 境界線の色
+//             topLeft = Offset(0f, 0f),
+//             size = Size(barWidth, size.height),
+//             style = Stroke(width = 4f) // 境界線の幅を指定
+//         )
+
         }
     }
 }
