@@ -16,7 +16,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication2.ViewModel.CurrentUserViewModel
 import com.example.myapplication2.ViewModel.FollowData
+import com.example.myapplication2.ViewModel.FollowReqUserViewModel
 import com.example.myapplication2.ViewModel.LoginViewModel
+import com.example.myapplication2.ViewModel.SearchUserViewModel
 //import com.example.myapplication2.ViewModel.SerchBarViewModel
 import com.example.myapplication2.ViewModel.UserResistrationViewModel
 
@@ -48,6 +50,16 @@ fun NavGraph() {
 
         composable(route = "FileUploadScreen") {
             FileUploadScreen()
+        }
+
+        composable(route = "SearchName") {
+            val SearchUserViewModel = hiltViewModel<SearchUserViewModel>()
+            SearchName(SearchUserViewModel = SearchUserViewModel)
+        }
+
+        composable(route = "FollowUser") {
+            val FollowReqUserViewModel = hiltViewModel<FollowReqUserViewModel>()
+            FollowUser(navController = navController,FollowReqUserViewModel = FollowReqUserViewModel)
         }
 
         composable(route = "Home") {

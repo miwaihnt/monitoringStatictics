@@ -17,7 +17,7 @@ class CurrentUserViewModel @Inject constructor(
     private  val auth: FirebaseAuth
 ):ViewModel() {
 
-    private val _user = MutableStateFlow<AllUser>(AllUser("","","", "",))
+    private val _user = MutableStateFlow<AllUser>(AllUser("","","", "",""))
     val user = _user.asStateFlow()
 
     private val _userNameState = MutableStateFlow<String>("")
@@ -36,7 +36,8 @@ class CurrentUserViewModel @Inject constructor(
                             password = document.getString("password") ?: "",
                             userName = document.getString("userName") as? String ?: "",
                             profileImage = document.getString("profileImage")?:"",
-                            email = document.getString("email") as? String ?: ""
+                            email = document.getString("email") as? String ?: "",
+                            docId = ""
                         )
                         _user.value = user
                         Log.d("currentUserInfo","_user:${_user.value}")

@@ -8,5 +8,6 @@ data class AllUser(
     val userName:String,
     val profileImage:String,
     val email:String,
+    val docId:String
 )
 

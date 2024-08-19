@@ -158,14 +158,14 @@ fun Home(
     ) {
         IconButton(
             onClick = {
-                navController.navigate("ListFriends")
+                navController.navigate("FollowUser")
             },
             modifier = Modifier
                 .size(48.dp)
                 .padding(vertical = 8.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.Home,
+                imageVector = Icons.Default.Add,
                 contentDescription = "Add",
                 tint = Color.White
             )

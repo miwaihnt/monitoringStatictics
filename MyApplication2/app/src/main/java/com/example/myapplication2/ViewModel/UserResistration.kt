@@ -50,7 +50,8 @@ class UserResistrationViewModel @Inject constructor(
                                     Log.d(TAG, "userDocCreate:$userId")
                                     val followData = hashMapOf(
                                         "followers" to emptyList<String>(),
-                                        "following" to emptyList<String>()
+                                        "following" to emptyList<String>(),
+                                        "followreqesting" to emptyList<String>()
                                     )
                                     db.collection("User").document(userId).collection("FollowData")
                                         .add(followData)

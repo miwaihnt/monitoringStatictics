@@ -58,6 +58,7 @@ fun ListFriends(navController: NavController,dbInfoGet: dbInfoGet,auth: Firebase
                                         userName = userDoc["userName"] as? String ?: "",
                                         email = userDoc["userName"] as? String ?: "",
                                         profileImage = userDoc["profileImage"] as? String?:"",
+                                        docId = ""
                                     )
                                     userList.add(userName)
                                 }
