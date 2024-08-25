@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Autorenew
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
@@ -112,20 +113,20 @@ fun FollowUser(
 
                 ) {
                     IconButton(
-                        onClick = {  },
+                        onClick = { FollowReqUserViewModel.fetchFollowReqUserList() },
                         modifier = Modifier
                             .padding(8.dp)
                             .size(48.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Phone,
+                            imageVector = Icons.Default.Autorenew,
                             contentDescription = "Serach",
                             tint = Color.White,
                             modifier = Modifier.size(48.dp)
                         )
                     }
                     Text(
-                        text = "電話検索",
+                        text = "画面更新",
                         color = Color.White,
                     )
                 }
@@ -155,7 +156,7 @@ fun FollowUser(
             ) {
                 val userList: List<AllUser> = FollowReqUserViewModel.userList.toList()
                 Log.d("FollowUser","userList:$userList")
-                // 正しい items の使い方
+
                 items(userList) { user ->
                     FolowReqUserList(user = user, viewModel = FollowReqUserViewModel)
                 }

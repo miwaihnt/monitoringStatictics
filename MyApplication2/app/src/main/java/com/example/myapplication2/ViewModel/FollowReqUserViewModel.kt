@@ -25,6 +25,7 @@ class FollowReqUserViewModel @Inject constructor(
     private val Tag = "FollowReqUserViewMode"
     var currentUserdocId :String = ""
     private var followReqUserDoc = listOf<String>()
+    private var followdocumentId: String = ""
 
     //フォローリクエストされているユーザを取得
     fun fetchFollowReqUserList() {
@@ -72,26 +73,40 @@ class FollowReqUserViewModel @Inject constructor(
 
     //友達かも？からフォローしたら、自身のフォロー対象に追加
     fun followReqUser(dcumentId:String) {
-        Log.d(Tag,"documentId:$dcumentId")
-        val document = db.collection("User").document(dcumentId).collection("FollowData").get()
-            .addOnSuccessListener {documentSnapshot ->
-                val documets = documentSnapshot.documents.firstOrNull()
-                Log.d(Tag,"documents:$documets")
-                documets?.let {
-                    val docuContent = db.collection("User").document(dcumentId).collection("FollowData").document("documets")
-                    docuContent.update("followers", FieldValue.arrayUnion(currentUserdocId))
-                        .addOnSuccessListener {
-                            Log.d(Tag,"request success")
-                        }.addOnFailureListener {
-                            Log.d(Tag,"update failed")
+        //自分のドキュメントのフォローを更新して、foloowreqを消す
+        Log.d(Tag,"currentUserdocId:$currentUserdocId")
+        Log.d(Tag,"dcumentId:$dcumentId")
+
+        followdocumentId = dcumentId
+
+        db.collection("User").document(currentUserdocId)
+            .collection("FollowData").get()
+            .addOnSuccessListener {querySnapshot ->
+                val followDataDoc = querySnapshot.documents.firstOrNull()
+                followDataDoc?.let {
+                    val subdocRef = db.collection("User").document(currentUserdocId)
+                        .collection("FollowData").document(followDataDoc.id)
+
+                    subdocRef.get()
+                        .addOnSuccessListener { document ->
+                            Log.d(Tag,"document:${document.data}")
+                            Log.d(Tag,"document:${document["following"]}")
+                            val followingList = document["following"] as List<String>
+                            Log.d(Tag,"followingList:$followingList")
+                            if (followingList.contains(followdocumentId)) {
+                                Log.d(Tag,"すでにFollow済みです。")
+                            } else {
+                                subdocRef.update("following", FieldValue.arrayUnion(dcumentId))
+                                subdocRef.update("followreqesting",FieldValue.arrayRemove(dcumentId))
+                            }
                         }
+                    userList.removeIf{it.docId == dcumentId}
+                    Log.d(Tag,"userList:${userList.toList()}")
                 }
-
-
             }
-        Log.d(Tag,"document:$document")
-
-
     }
-
 }
+
+
+
+

@@ -26,7 +26,6 @@ class SearchUserViewModel @Inject constructor(
     val user = _user.asStateFlow()
     private var documentId = ""
     private var currentUserdocId: String? = ""
-//    private var currentUser = AllUser("","","","")
 
     //名前検索したユーザを特定
     fun FetchFoReqUser(inputName: String) {
@@ -64,7 +63,7 @@ class SearchUserViewModel @Inject constructor(
         Log.d(Tag, "uid:$uid")
     }
 
-    //フォローボタンを押下したら対象ユーザのフォロワー、フォローを更新
+    //フォローボタンを押下したらログインユーザのフォローを更新
     fun updateFollow() {
         //現在のログインユーザのフォローコレクションの更新
         val selectedQuery =
@@ -83,36 +82,68 @@ class SearchUserViewModel @Inject constructor(
                 Log.d(Tag,"subDocRef:$subDocRef")
                 Log.d(Tag,"docId:$documentId")
                 //現在のユーザのfollowingに検索したユーザを追加
-                subDocRef.update("following", FieldValue.arrayUnion(documentId))
-                    .addOnSuccessListener {
-                        Log.d(Tag,"update success")
-                    }.addOnFailureListener {
-                        Log.d(Tag,"update failed")
+                subDocRef.get()
+                    .addOnSuccessListener {document ->
+                        val followingList = document["following"] as List<String>
+                        Log.d(Tag,"followingLis:$followingList")
+                        if (followingList.contains(documentId)) {
+                            Log.d(Tag,"contains")
+                        } else {
+                            subDocRef.update("following", FieldValue.arrayUnion(documentId))
+                            Log.d(Tag,"not contains")
+                        }
+
                     }
+
             }
         }
     }
 
     //フォローしたユーザのドキュメントを更新
     fun followReqUser() {
-        val followerSelectQuery = db.collection("User").document("$documentId")
-            .collection("FollowData").get()
-        Log.d(Tag,"documentId:$documentId")
+        try {
+            val followerSelectQuery = db.collection("User").document("$documentId")
+                .collection("FollowData").get()
+            Log.d(Tag,"documentId:$documentId")
 
-        followerSelectQuery.addOnSuccessListener {querySnapshot ->
-            val followSubDocSnapshot = querySnapshot.documents.firstOrNull()
-            followSubDocSnapshot?.let {
-               val followSubDocRef =  db.collection("User").document("$documentId")
-                    .collection("FollowData").document(followSubDocSnapshot.id)
-                followSubDocRef.update("followreqesting", FieldValue.arrayUnion(currentUserdocId))
-                    .addOnSuccessListener {
-                        Log.d(Tag,"request success")
-                    }.addOnFailureListener {
-                        Log.d(Tag,"update failed")
-                    }
+            followerSelectQuery.addOnSuccessListener {querySnapshot ->
+                val followSubDocSnapshot = querySnapshot.documents.firstOrNull()
+                followSubDocSnapshot?.let {
+                    val followSubDocRef =  db.collection("User").document("$documentId")
+                        .collection("FollowData").document(followSubDocSnapshot.id)
+                    followSubDocRef.get()
+                        .addOnSuccessListener { document ->
+                            try {
+                                Log.d(Tag,"document:$document")
+                                val folloreqList = document["followreqesting"] as List<String> ?: emptyList()
+                                Log.d(Tag,"followreqesting:$folloreqList")
+                                if (folloreqList.contains(currentUserdocId)) {
+                                    Log.d(Tag,"contains")
+                                } else {
+                                    followSubDocRef.update("followreqesting", FieldValue.arrayUnion(currentUserdocId))
+                                        .addOnSuccessListener {
+                                            Log.d(Tag,"request success")
+                                        }.addOnFailureListener {exception ->
+                                            Log.d(Tag,"update failed:${exception.message}")
+                                        }
+                                }
+                            } catch (e:Exception) {
+                                Log.d(Tag,"failed: ${e.message}")
+                            }
+                        }.addOnFailureListener { exception ->
+                            Log.d(Tag,"update failed: ${exception.message}")
+                        }
+                }
+
             }
+        } catch (e:Exception)  {
+
+            Log.d(Tag,"unexpextedErro:${e.message}")
 
         }
+
+
+
 
     }
 
