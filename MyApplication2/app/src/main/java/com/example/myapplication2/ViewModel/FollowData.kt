@@ -23,8 +23,13 @@ class FollowData @Inject constructor (
     val userList = mutableStateListOf<AllUser>()
     private val uiState = MutableStateFlow(UiState())
     val _uiState = uiState.asStateFlow()
+    private val followUserList = mutableListOf<AllUser>()
+    private val followerUserList = mutableListOf<AllUser>()
+    private val mutualFollowList = mutableListOf<AllUser>()
 
-    init {
+
+
+        init {
         fetchFollow()
     }
 
@@ -57,19 +62,51 @@ class FollowData @Inject constructor (
                                         userName = userDoc["userName"] as? String ?: "",
                                         email = userDoc["userName"] as? String ?: "",
                                         profileImage = userDoc["profileImage"] as? String ?: "",
-                                        docId = ""
+                                        docId = "${userDoc.id}"
                                     )
-                                    userList.add(userName)
+//                                    userList.add(userName)
+                                    followUserList.add(userName)
                                     Log.d("fetchFollow","userList:${userList.toList()}")
+                                    Log.d("fetchFollow","followUserList:${followUserList.toList()}")
+
                                 }
                             }
+                            //フォローされているユーザの名前を抽出
+                            for (userData in followers) {
+                                val userDoc = db.collection("User").document(userData).get().await()
+                                userDoc?.let{
+                                    val userName = AllUser(
+                                        password = userDoc["password"] as? String ?: "",
+                                        userName = userDoc["userName"] as? String ?: "",
+                                        email = userDoc["userName"] as? String ?: "",
+                                        profileImage = userDoc["profileImage"] as? String ?: "",
+                                        docId = "${userDoc.id}"
+                                    )
+                                    followerUserList.add(userName)
+                                }
+                            }
+                            Log.d("fetchFollow","followerUserList:${followerUserList.toList()}")
+                            //フォロー・フォロワーが一致してる場合、リストに追加
+                            val followerUserDocId = followUserList.map { it.docId }.toSet()
+                            followerUserList.forEach { followUser ->
+                                if (followerUserDocId.contains(followUser.docId)) {
+                                    mutualFollowList.add(followUser)
+                                }
+                            }
+                            Log.d("ListFriends","mutableList:$mutualFollowList")
+                            userList.addAll(mutualFollowList)
+                            Log.d("ListFriends","userList:${userList.toList()}")
+
                         }
+
                     } else {
                         Log.d("ListFriends", "No data found in FollowData")
                     }
+
                     uiState.value = _uiState.value.copy(
                         userList = userList
                     )
+
                 }
             } catch (e: Exception) {
                 Log.e("ListError", "Firestre not getting :${e.message}", e)
