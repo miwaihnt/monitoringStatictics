@@ -71,7 +71,7 @@ class FollowReqUserViewModel @Inject constructor(
 
     }
 
-    //友達かも？からフォローしたら、自身のフォロー対象に追加
+    //友達かも？からフォローしたら、自身のフォロー対象と相手のフォロワーズに追加
     fun followReqUser(dcumentId:String) {
         //自分のドキュメントのフォローを更新して、foloowreqを消す
         Log.d(Tag,"currentUserdocId:$currentUserdocId")
@@ -79,6 +79,7 @@ class FollowReqUserViewModel @Inject constructor(
 
         followdocumentId = dcumentId
 
+        //自身のフォローに追加
         db.collection("User").document(currentUserdocId)
             .collection("FollowData").get()
             .addOnSuccessListener {querySnapshot ->
@@ -104,6 +105,27 @@ class FollowReqUserViewModel @Inject constructor(
                     Log.d(Tag,"userList:${userList.toList()}")
                 }
             }
+
+        //相手のフォロワーズに追加
+        db.collection("User").document(followdocumentId).collection("FollowData").get()
+            .addOnSuccessListener { querySnapshot ->
+                val sucdocRef = querySnapshot.documents.firstOrNull()
+                sucdocRef?.let {
+                    val followDoc = db.collection("User").document(followdocumentId).collection("FollowData").document(sucdocRef.id)
+                        followDoc.get()
+                        .addOnSuccessListener{ document ->
+                            val followersList = document["followers"] as List<String>
+                            if (followersList.contains(followdocumentId)) {
+                                Log.d(Tag,"すでにFollow済みです。")
+                            } else {
+                                followDoc.update("followers",FieldValue.arrayUnion(currentUserdocId))
+                            }
+                        }.addOnFailureListener { exception ->
+                            Log.d(Tag,"${exception.message}")
+                            }
+                }
+            }
+
     }
 }
 

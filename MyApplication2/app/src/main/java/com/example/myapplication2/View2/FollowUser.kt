@@ -103,7 +103,7 @@ fun FollowUser(
                         )
                     }
                     Text(
-                        text = "名前検索",
+                        text = "ID検索",
                         color = Color.White,
                     )
                 }

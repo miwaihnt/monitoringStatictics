@@ -37,7 +37,7 @@ class CurrentUserViewModel @Inject constructor(
                             userName = document.getString("userName") as? String ?: "",
                             profileImage = document.getString("profileImage")?:"",
                             email = document.getString("email") as? String ?: "",
-                            docId = ""
+                            docId = document.id
                         )
                         _user.value = user
                         Log.d("currentUserInfo","_user:${_user.value}")

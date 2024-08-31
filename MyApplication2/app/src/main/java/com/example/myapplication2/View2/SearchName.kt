@@ -52,7 +52,7 @@ fun SearchName(
 ) {
     
     val user by SearchUserViewModel.user.collectAsState()
-    var inputName by remember { mutableStateOf("") }
+    var inputId by remember { mutableStateOf("") }
     var searchFlag by rememberSaveable { mutableStateOf(false) }
 
     Box (
@@ -78,9 +78,9 @@ fun SearchName(
             )
             {
                 TextField(
-                    value = inputName,
-                    onValueChange = {inputName = it} ,
-                    label = { Text("ユーザ名") },
+                    value = inputId,
+                    onValueChange = {inputId = it} ,
+                    label = { Text("ユーザID") },
                     modifier = Modifier
                         .padding(8.dp),
 
@@ -89,7 +89,7 @@ fun SearchName(
                 Button(
                     onClick = {
                         //データベースにアクセスし、ユーザ情報を取得する
-                        SearchUserViewModel.FetchFoReqUser(inputName)
+                        SearchUserViewModel.fetchReqUser(inputId)
                         searchFlag = true
                     }
                 ) {

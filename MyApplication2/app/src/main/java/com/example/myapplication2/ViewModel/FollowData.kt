@@ -71,6 +71,7 @@ class FollowData @Inject constructor (
 
                                 }
                             }
+
                             //フォローされているユーザの名前を抽出
                             for (userData in followers) {
                                 val userDoc = db.collection("User").document(userData).get().await()
@@ -86,6 +87,7 @@ class FollowData @Inject constructor (
                                 }
                             }
                             Log.d("fetchFollow","followerUserList:${followerUserList.toList()}")
+
                             //フォロー・フォロワーが一致してる場合、リストに追加
                             val followerUserDocId = followUserList.map { it.docId }.toSet()
                             followerUserList.forEach { followUser ->

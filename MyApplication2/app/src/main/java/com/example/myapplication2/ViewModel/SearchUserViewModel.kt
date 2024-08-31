@@ -27,41 +27,31 @@ class SearchUserViewModel @Inject constructor(
     private var documentId = ""
     private var currentUserdocId: String? = ""
 
-    //名前検索したユーザを特定
-    fun FetchFoReqUser(inputName: String) {
 
-        //検索したユーザのドキュメントIDの取得
-        db.collection("User").whereEqualTo("userName", "$inputName").get()
-            .addOnSuccessListener { documents ->
-                for (document in documents) {
-                    documentId = document.id
-                    Log.d(Tag, "documentId:$documentId")
-
-                    //取得したドキュメントIDを使用してユーザを表示する情報を取得
-                    db.collection("User").document("$documentId").get()
-                        .addOnSuccessListener { document ->
-                            val user = AllUser(
-                                password = document.getString("password") ?: "",
-                                userName = document.getString("userName") as? String ?: "",
-                                profileImage = document.getString("profileImage") ?: "",
-                                email = document.getString("email") as? String ?: "",
-                                docId = ""
-                            )
-                            _user.value = user
-                            Log.d(Tag, "user:${user.password}")
-                        }.addOnFailureListener { Exception ->
-                            Log.e(Tag, Exception.toString())
-                        }
-                }
-            }.addOnFailureListener { Exception ->
-                Log.e(Tag, Exception.toString())
+    //documentIdをもとにユーザ検索
+    fun fetchReqUser(inputId:String) {
+        db.collection("User").document(inputId).get()
+            .addOnSuccessListener { document ->
+                val user = AllUser(
+                    password = document.getString("password") ?: "",
+                    userName = document.getString("userName") as? String ?: "",
+                    profileImage = document.getString("profileImage") ?: "",
+                    email = document.getString("email") as? String ?: "",
+                    docId = "$inputId"
+                )
+                _user.value = user
+                Log.d(Tag, "user:${user.password}")
             }
 
         //現在のログインユーザのドキュメントを取得
         val uid = auth.currentUser?.uid
         currentUserdocId = uid
         Log.d(Tag, "uid:$uid")
+
+        documentId = inputId
+
     }
+
 
     //フォローボタンを押下したらログインユーザのフォローを更新
     fun updateFollow() {
@@ -86,13 +76,14 @@ class SearchUserViewModel @Inject constructor(
                     .addOnSuccessListener {document ->
                         val followingList = document["following"] as List<String>
                         Log.d(Tag,"followingLis:$followingList")
+
+                        //followingListに追加
                         if (followingList.contains(documentId)) {
                             Log.d(Tag,"contains")
                         } else {
                             subDocRef.update("following", FieldValue.arrayUnion(documentId))
                             Log.d(Tag,"not contains")
                         }
-
                     }
 
             }
@@ -116,7 +107,10 @@ class SearchUserViewModel @Inject constructor(
                             try {
                                 Log.d(Tag,"document:$document")
                                 val folloreqList = document["followreqesting"] as List<String> ?: emptyList()
+                                val followersList = document["followers"] as List<String>
                                 Log.d(Tag,"followreqesting:$folloreqList")
+                                Log.d(Tag,"followers:$followersList")
+
                                 if (folloreqList.contains(currentUserdocId)) {
                                     Log.d(Tag,"contains")
                                 } else {
@@ -127,6 +121,18 @@ class SearchUserViewModel @Inject constructor(
                                             Log.d(Tag,"update failed:${exception.message}")
                                         }
                                 }
+
+                                if (followersList.contains(currentUserdocId)) {
+                                    Log.d(Tag,"contains")
+                                } else {
+                                    followSubDocRef.update("followers",FieldValue.arrayUnion(currentUserdocId))
+                                        .addOnSuccessListener {
+                                            Log.d(Tag,"request success")
+                                        }.addOnFailureListener {exception ->
+                                            Log.d(Tag,"update failed:${exception.message}")
+                                        }
+                                }
+
                             } catch (e:Exception) {
                                 Log.d(Tag,"failed: ${e.message}")
                             }
@@ -141,10 +147,6 @@ class SearchUserViewModel @Inject constructor(
             Log.d(Tag,"unexpextedErro:${e.message}")
 
         }
-
-
-
-
     }
 
 }
