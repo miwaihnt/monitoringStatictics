@@ -145,8 +145,8 @@ fun Home(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ){
                 val userList = uiState.userList
-                items(userList) {
-                    UserListItem(user = it)
+                items(userList) { user ->
+                    UserListItem(user = user, navController = navController)
                 }
             }
         }
@@ -290,13 +290,16 @@ fun Home(
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun UserListItem(user: AllUser) {
+    fun UserListItem(user: AllUser, navController: NavController) {
         Card(
             modifier = Modifier
                 .padding(vertical = 4.dp)
                 .clip(CardDefaults.shape)
                 .combinedClickable(
-                    onClick = { /* to go detail screen */ },
+                    onClick = { // "StatisticsInfo"画面に遷移
+                        navController.navigate("StatisticsInfo/${user.docId}")
+                        Log.d("tapped userName", "${user.userName},${user.docId}")
+                    },
                     onLongClick = { /* to selected */ }
                 )
                 .clip(CardDefaults.shape),
