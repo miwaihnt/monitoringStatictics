@@ -2,6 +2,7 @@ package com.example.myapplication2.View2
 
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import androidx.navigation.compose.NavHost
@@ -14,11 +15,13 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.myapplication2.StatisticsInfo
 import com.example.myapplication2.ViewModel.CurrentUserViewModel
 import com.example.myapplication2.ViewModel.FollowData
 import com.example.myapplication2.ViewModel.FollowReqUserViewModel
 import com.example.myapplication2.ViewModel.LoginViewModel
 import com.example.myapplication2.ViewModel.SearchUserViewModel
+import com.example.myapplication2.ViewModel.StatisticsViewModel
 //import com.example.myapplication2.ViewModel.SerchBarViewModel
 import com.example.myapplication2.ViewModel.UserResistrationViewModel
 
@@ -71,6 +74,18 @@ fun NavGraph() {
         composable(route = "ListFriendsUI") {
             ListFriendsUI()
         }
+
+        composable("StatisticsInfo/{userId}") { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            val viewModel: StatisticsViewModel = hiltViewModel()
+            LaunchedEffect(userId) {
+                if (userId != null) {
+                    viewModel.getUserStatistics(userId)
+                }
+            }
+            StatisticsInfo(navController = navController, viewModel = viewModel)
+        }
+
     }
     Log.d("DisplayGraph", "Called DisplayNav")
 }
