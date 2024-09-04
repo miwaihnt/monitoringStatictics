@@ -1,6 +1,8 @@
 package com.example.myapplication2
 
 import android.util.Log
+import com.example.myapplication2.View2.AppUsageData
+import com.example.myapplication2.View2.DailyStatistics
 import com.google.firebase.firestore.FirebaseFirestore
 
 // 統計情報の取得関数

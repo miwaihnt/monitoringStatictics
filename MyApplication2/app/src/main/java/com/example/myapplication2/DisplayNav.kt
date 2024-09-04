@@ -8,7 +8,9 @@ import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import android.app.usage.UsageStats
-import android.app.usage.UsageStatsManager
+import androidx.compose.runtime.LaunchedEffect
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.myapplication2.ViewModel.StatisticsViewModel
 
 @Composable
 fun DisplayNav(userRegistration: UserRegistration, auth: FirebaseAuth, dbInfoGet: dbInfoGet,
@@ -32,8 +34,15 @@ fun DisplayNav(userRegistration: UserRegistration, auth: FirebaseAuth, dbInfoGet
         composable( route = "FriendSearchScreen") {
             FriendSearchScreen(dbAddFollowData,navController = navController)
         }
-        composable( route = "StatisticsInfo"){
-            StatisticsInfo(navController = navController,getStatistics)
+        composable("StatisticsInfo/{userId}") { backStackEntry ->
+            val userId = backStackEntry.arguments?.getString("userId")
+            val viewModel: StatisticsViewModel = hiltViewModel()
+            LaunchedEffect(userId) {
+                if (userId != null) {
+                    viewModel.getUserStatistics(userId)
+                }
+            }
+            StatisticsInfo(navController = navController, viewModel = viewModel)
         }
         composable( route = "ProfileSettingsScreen") {
             ParentComponent(navController = navController)
