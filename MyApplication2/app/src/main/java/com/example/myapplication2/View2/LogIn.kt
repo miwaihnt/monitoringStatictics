@@ -9,6 +9,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,10 +17,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.myapplication2.ViewModel.CurrentUserViewModel
+import com.example.myapplication2.ViewModel.FileUploadViewModel
 import com.example.myapplication2.ViewModel.LoginViewModel
+import com.example.myapplication2.ViewModel.UploadStatisticsViewModel
+import com.example.myapplication2.ViewModel.UsageStatsViewModel
 
 @Composable
 fun LogInView(
@@ -28,8 +33,14 @@ fun LogInView(
     navController: NavController
 ) {
 
+    val usageStatsViewModel: UsageStatsViewModel = hiltViewModel()
+    val statisticsViewModel: UploadStatisticsViewModel = hiltViewModel()
+    val fileUploadViewModel: FileUploadViewModel = hiltViewModel()
+
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -51,7 +62,14 @@ fun LogInView(
 
         Button(
             onClick = {
-                loginViewModel.logIn(email, password, navController)
+                loginViewModel.logIn(
+                    email,
+                    password,
+                    navController,
+                    usageStatsViewModel, // UsageStatsViewModel を渡す
+                    statisticsViewModel, // UploadStatisticsViewModel を渡す
+                    fileUploadViewModel // FileUploadViewModel を渡す
+                )
             },
             modifier = Modifier
                 .padding(16.dp)
@@ -69,5 +87,7 @@ fun LogInView(
         ) {
             Text(text = "登録")
         }
+
     }
+
 }
