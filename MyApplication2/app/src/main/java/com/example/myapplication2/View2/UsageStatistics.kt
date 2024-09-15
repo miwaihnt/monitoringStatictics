@@ -50,8 +50,10 @@ val colors = listOf(
 
 
 data class AppUsageData(
-    val packageName: String,
-    val totalTimeInForeground: Long
+    val appName: String,
+    val totalTimeInForeground: Long,
+    val lastTime: String? = null,  // nullable に変更
+    val iconUrl: String? = null
 )
 
 data class DailyStatistics(
@@ -87,33 +89,51 @@ fun calculateDailyUsage(dailyStatistics: List<DailyStatistics>, selectedDate: St
     return dailyStatistics
         .filter { it.date == selectedDate }
         .flatMap { it.apps }
-        .groupBy { it.packageName }
-        .map { (packageName, usages) ->
+        .groupBy { it.appName }  // appName でグルーピング
+        .map { (appName, usages) ->
+            val totalTimeInForeground = usages.sumOf { it.totalTimeInForeground }
+
+            // lastTime が null の場合でも処理できるように null-safe 比較を追加
+            val latestUsage = usages.maxByOrNull { it.lastTime ?: "" } // 最新のアイコンURLを持つ使用データを取得
+
             AppUsageData(
-                packageName,
-                usages.sumOf { it.totalTimeInForeground }
+                appName = appName,
+                totalTimeInForeground = totalTimeInForeground,
+                lastTime = latestUsage?.lastTime ?: "", // latestUsage が null なら空文字をセット
+                iconUrl = latestUsage?.iconUrl // 最新の iconUrl をセット
             )
         }
-        .sortedByDescending { it.totalTimeInForeground } // 降順にソート
+        .sortedByDescending { it.totalTimeInForeground } // 合計使用時間で降順ソート
 }
 
-fun calculatePeriodUsage(dailyStatistics: List<DailyStatistics>, startDate: LocalDate, endDate: LocalDate): List<AppUsageData> {
+
+fun calculatePeriodUsage(
+    dailyStatistics: List<DailyStatistics>,
+    startDate: LocalDate,
+    endDate: LocalDate
+): List<AppUsageData> {
     return dailyStatistics
         .filter {
             val date = LocalDate.parse(it.date)
             !date.isBefore(startDate) && !date.isAfter(endDate)
         }
         .flatMap { it.apps }
-        .groupBy { it.packageName }
-        .map { (packageName, usages) ->
+        .groupBy { it.appName }  // appName でグルーピング
+        .map { (appName, usages) ->
+            val totalTimeInForeground = usages.sumOf { it.totalTimeInForeground }
+
+            // lastTime が null の場合でも処理できるように null-safe 比較を追加
+            val latestUsage = usages.maxByOrNull { it.lastTime ?: "" } // 最新のアイコンURLを持つ使用データを取得
+
             AppUsageData(
-                packageName,
-                usages.sumOf { it.totalTimeInForeground }
+                appName = appName,
+                totalTimeInForeground = totalTimeInForeground,
+                lastTime = latestUsage?.lastTime ?: "", // latestUsage が null なら空文字をセット
+                iconUrl = latestUsage?.iconUrl // 最新の iconUrl をセット
             )
         }
-        .sortedByDescending { it.totalTimeInForeground } // 降順にソート
+        .sortedByDescending { it.totalTimeInForeground } // 合計使用時間で降順ソート
 }
-
 
 fun getMainAndOtherUsageData(usageData: List<AppUsageData>, mainAppsCount: Int): Pair<List<AppUsageData>, AppUsageData?> {
     val mainUsageData = usageData.take(mainAppsCount)
