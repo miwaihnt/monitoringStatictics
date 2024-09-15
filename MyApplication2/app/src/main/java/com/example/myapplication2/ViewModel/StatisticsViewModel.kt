@@ -1,5 +1,6 @@
 package com.example.myapplication2.ViewModel
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.myapplication2.View2.AppUsageData
@@ -14,6 +15,8 @@ class StatisticsViewModel @Inject constructor(private val db: FirebaseFirestore)
     val dailyStatistics = MutableLiveData<List<DailyStatistics>>()
     val errorMessage = MutableLiveData<String?>()
 
+    val Tag = "StatisticsViewModel"
+
     fun getUserStatistics(userId: String) {
         db.collection("statistics")
             .document(userId)
@@ -26,6 +29,7 @@ class StatisticsViewModel @Inject constructor(private val db: FirebaseFirestore)
                 } else {
                     val allStatisticsData = mutableListOf<DailyStatistics>()
                     for (doc in dailyQuerySnapshot) {
+                        Log.d(Tag,"doc:${doc.data}")
                         val date = doc.id
                         val apps = mutableListOf<AppUsageData>()
                         for ((key, value) in doc.data) {

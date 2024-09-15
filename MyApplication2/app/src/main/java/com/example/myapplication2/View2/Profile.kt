@@ -10,11 +10,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Text
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.myapplication2.ViewModel.FileUploadViewModel
 import com.example.myapplication2.ViewModel.CurrentUserViewModel
@@ -36,6 +39,7 @@ import com.example.myapplication2.ViewModel.UserResistrationViewModel
 fun Profile(
     currentUserViewModel: CurrentUserViewModel = viewModel(),
     fileUploadViewModel: FileUploadViewModel = viewModel(),
+    navController: NavController,
 ) {
     val user by currentUserViewModel.user.collectAsState()
     val userName by currentUserViewModel.userNameState.collectAsState()
@@ -72,12 +76,32 @@ fun Profile(
             modifier = Modifier.background(color = Color.Black),
         ) {
 
-            Text(
-                text = "プロフィール変更",
-                color = Color.White,
-                fontSize = 24.sp,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+            Row (
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                IconButton(
+                    onClick = { navController.navigate("Home") },
+                    modifier = Modifier.size(24.dp)
+
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronLeft, // ＜ のアイコン
+                        contentDescription = "Back",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Spacer(Modifier.width(8.dp))
+                
+                Text(
+                    text = "プロフィール変更",
+                    color = Color.White,
+                    fontSize = 24.sp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
 
             // 境界線を追加
             Divider(

@@ -47,7 +47,7 @@ fun NavGraph() {
             val curretUserViewModel = hiltViewModel<CurrentUserViewModel>()
             val fileUploadViewModel = hiltViewModel<FileUploadViewModel>()
 
-            Profile(currentUserViewModel = curretUserViewModel,fileUploadViewModel = fileUploadViewModel)
+            Profile(currentUserViewModel = curretUserViewModel,fileUploadViewModel = fileUploadViewModel,navController = navController)
 
         }
 
@@ -57,7 +57,7 @@ fun NavGraph() {
 
         composable(route = "SearchName") {
             val SearchUserViewModel = hiltViewModel<SearchUserViewModel>()
-            SearchName(SearchUserViewModel = SearchUserViewModel)
+            SearchName(navController = navController,SearchUserViewModel = SearchUserViewModel)
         }
 
         composable(route = "FollowUser") {

@@ -1,9 +1,12 @@
 package com.example.myapplication2.ViewModel
 
+import android.app.AlertDialog
 import android.util.Log
+import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavController
 import com.example.myapplication2.Data.AllUser
 import com.example.myapplication2.UserRegistration
 import com.google.firebase.auth.FirebaseAuth
@@ -20,65 +23,75 @@ class UserResistrationViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val TAG = "UserResistration"
+    var alertDialog = mutableStateOf(false)
+    var alertDialogMessage = mutableStateOf("")
 
     //ユーザ登録
     fun AuthUserRegistration(
         userName: String,
         email: String,
-        password: String
+        password: String,
+        navController: NavController,
     ) {
         Log.d(TAG,"AuthUserRegistration called")
-        auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener() { task ->
-                if (task.isSuccessful) {
-                    // Sign in 2success, update UI with the signed-in user's information
-                    Log.d(TAG, "createUserWithEmail:success")
-                    val user = auth.currentUser
-                    if (user !== null) {
-                        val userId = user.uid
-                        Log.d(TAG, "userid:$userId")
-                        try {
-                            val firebaseUser = hashMapOf(
-                                "userName" to userName,
-                                "email" to email,
-                                "password" to password
-                            )
-                            db.collection("User")
-                                .document(userId)
-                                .set(firebaseUser)
-                                .addOnSuccessListener {
-                                    Log.d(TAG, "userDocCreate:$userId")
-                                    val followData = hashMapOf(
-                                        "followers" to emptyList<String>(),
-                                        "following" to emptyList<String>(),
-                                        "followreqesting" to emptyList<String>()
-                                    )
-                                    db.collection("User").document(userId).collection("FollowData")
-                                        .add(followData)
-                                        .addOnSuccessListener { subDocumentReference ->
-                                            Log.d(
-                                                TAG,
-                                                "Subcollection added with ID: ${subDocumentReference.id}"
-                                            )
-                                        }
-                                        .addOnFailureListener { e ->
-                                            Log.e(TAG, "Error adding subCollection,e")
-                                        }
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e(TAG, "Error adding document", e)
-                                }
 
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Failure Registration")
+        if (userName.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener() { task ->
+                    if (task.isSuccessful) {
+                        // Sign in 2success, update UI with the signed-in user's information
+                        Log.d(TAG, "createUserWithEmail:success")
+                        val user = auth.currentUser
+                        if (user !== null) {
+                            val userId = user.uid
+                            Log.d(TAG, "userid:$userId")
+                            try {
+                                val firebaseUser = hashMapOf(
+                                    "userName" to userName,
+                                    "email" to email,
+                                    "password" to password
+                                )
+                                db.collection("User")
+                                    .document(userId)
+                                    .set(firebaseUser)
+                                    .addOnSuccessListener {
+                                        Log.d(TAG, "userDocCreate:$userId")
+                                        val followData = hashMapOf(
+                                            "followers" to emptyList<String>(),
+                                            "following" to emptyList<String>(),
+                                            "followreqesting" to emptyList<String>()
+                                        )
+                                        db.collection("User").document(userId).collection("FollowData")
+                                            .add(followData)
+                                            .addOnSuccessListener { subDocumentReference ->
+                                                Log.d(TAG, "Subcollection added with ID: ${subDocumentReference.id}")
+                                                navController.navigate("LogInView")
+                                            }
+                                            .addOnFailureListener { e ->
+                                                Log.e(TAG, "Error adding subCollection,e")
+                                            }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e(TAG, "Error adding document", e)
+                                    }
+                            } catch (e: Exception) {
+                                Log.e(TAG, "Failure Registration")
+                            }
                         }
 
+                    } else {
+                        Log.e(TAG, "task is failed: ${task.exception?.message}")
+                        alertDialog.value = true
+                        alertDialogMessage.value = "${task.exception?.message}"
                     }
-
-                } else {
-                    Log.e(TAG, "task is failed: ${task.exception}")
                 }
-            }
+        } else {
+            Log.d(TAG,"input information is empty")
+            alertDialog.value = true
+            alertDialogMessage.value = "入力されていない項目があります"
+        }
+
+
     }
 
 }

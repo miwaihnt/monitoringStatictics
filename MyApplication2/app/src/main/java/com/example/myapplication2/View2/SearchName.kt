@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -39,8 +41,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.myapplication2.R
 import com.example.myapplication2.ViewModel.CurrentUserViewModel
@@ -48,6 +53,7 @@ import com.example.myapplication2.ViewModel.SearchUserViewModel
 
 @Composable
 fun SearchName(
+    navController: NavController,
     SearchUserViewModel: SearchUserViewModel = viewModel(),
 ) {
     
@@ -66,8 +72,41 @@ fun SearchName(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .padding(16.dp)
         )
         {
+
+
+
+            Row {
+
+                IconButton(
+                    onClick = { navController.navigate("FollowUser") },
+                    modifier = Modifier.size(24.dp)
+
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronLeft, // ＜ のアイコン
+                        contentDescription = "Back",
+                        tint = Color.White,
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+
+                Spacer(Modifier.width(8.dp))
+
+                Text(text = "ID検索",
+                    modifier = Modifier
+                        .padding(bottom = 16.dp),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                )
+            }
+
+
+
+
             Row (
                 modifier = Modifier
                     .fillMaxWidth()
@@ -82,8 +121,8 @@ fun SearchName(
                     onValueChange = {inputId = it} ,
                     label = { Text("ユーザID") },
                     modifier = Modifier
-                        .padding(8.dp),
-
+                        .padding(8.dp)
+                        .weight(1f)
                     )
 
                 Button(
@@ -93,7 +132,10 @@ fun SearchName(
                         searchFlag = true
                     }
                 ) {
-                    Text(text = "検索")
+                    Text(text = "検索",
+                        modifier = Modifier
+                            .padding(8.dp)
+                        )
                 }
             }
 

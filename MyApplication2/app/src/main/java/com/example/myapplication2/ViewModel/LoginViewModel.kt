@@ -23,17 +23,22 @@ class LoginViewModel @Inject constructor (
         password: String,
         navController: NavController,
         ) {
-        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    navController.navigate("Home")
-                    Log.d("performLogin", "Succcess")
-                } else {
-                    Log.d("performLogin", "Failed")
-                    val errorCode = task.exception?.message
-                    Log.e("performLogin", "ErrorCode: $errorCode")
+
+        if (email.isNotBlank() && password.isNotBlank()) {
+            FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        navController.navigate("Home")
+                        Log.d("performLogin", "Succcess")
+                    } else {
+                        Log.d("performLogin", "Failed")
+                        val errorCode = task.exception?.message
+                        Log.e("performLogin", "ErrorCode: $errorCode")
+                    }
                 }
-            }
+        } else {
+            Log.d("performLogin","Failed")
+        }
     }
 }
 

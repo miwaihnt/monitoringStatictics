@@ -45,6 +45,7 @@ import com.example.myapplication2.Data.AllUser
 import com.example.myapplication2.ViewModel.FollowReqUserViewModel
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.ui.Alignment
 
 
@@ -72,13 +73,36 @@ fun FollowUser(
             modifier = Modifier
                 .padding(16.dp)
         ) {
-            Text(text = "友達を探す",
-                modifier = Modifier
-                    .padding(bottom = 16.dp),
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp
+
+
+            Row {
+
+                IconButton(
+                    onClick = { navController.navigate("Home") },
+                    modifier = Modifier.size(24.dp)
+
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronLeft, // ＜ のアイコン
+                        contentDescription = "Back",
+                        tint = Color.White,
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+
+                Spacer(Modifier.width(8.dp))
+
+                Text(text = "友達を探す",
+                    modifier = Modifier
+                        .padding(bottom = 16.dp),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
                 )
+            }
+
+
+
             //検索バーの実装
             Row (
                 modifier = Modifier
