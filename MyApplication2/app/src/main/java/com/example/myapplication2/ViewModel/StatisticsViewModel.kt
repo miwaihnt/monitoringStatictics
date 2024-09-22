@@ -29,14 +29,15 @@ class StatisticsViewModel @Inject constructor(private val db: FirebaseFirestore)
                 } else {
                     val allStatisticsData = mutableListOf<DailyStatistics>()
                     for (doc in dailyQuerySnapshot) {
-                        Log.d(Tag,"doc:${doc.data}")
                         val date = doc.id
                         val apps = mutableListOf<AppUsageData>()
                         for ((key, value) in doc.data) {
                             val usageData = value as Map<*, *>
-                            val packageName = usageData["packageName"] as String
+                            val appName = usageData["appName"] as String
                             val totalTime = usageData["totalTimeInForeground"] as Long
-                            apps.add(AppUsageData(packageName, totalTime))
+                            val lastTime = usageData["lastTime"] as String
+                            val iconUrl = usageData["iconUrl"] as String
+                            apps.add(AppUsageData(appName, totalTime, lastTime, iconUrl))
                         }
                         allStatisticsData.add(DailyStatistics(date, apps))
                     }

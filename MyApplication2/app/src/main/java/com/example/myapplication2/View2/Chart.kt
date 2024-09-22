@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,7 +23,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -40,10 +46,14 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import coil.compose.rememberAsyncImagePainter
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -107,17 +117,59 @@ fun AppUsageChart(mainUsageData: List<AppUsageData>, otherUsageData: AppUsageDat
                                         .background(colors[index % colors.size])
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Column {
-                                    Text(
-                                        text = data.packageName,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        text = formatTime(data.totalTimeInForeground),
-                                        fontSize = 12.sp,
-                                        color = Color.DarkGray
-                                    )
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    // アプリアイコンを表示 (Coilライブラリを使用)
+                                    data.iconUrl?.let { iconUrl ->
+                                        Image(
+                                            painter = rememberAsyncImagePainter(
+                                                ImageRequest.Builder(LocalContext.current)
+                                                    .data(data = iconUrl)
+                                                    .apply {
+                                                        crossfade(true) // クロスフェード効果を適用
+                                                        placeholder(android.R.drawable.ic_menu_gallery) // プレースホルダーを指定
+                                                        error(android.R.drawable.stat_notify_error) // エラー時の代替アイコンを指定
+                                                    }
+                                                    .build()
+                                            ),
+                                            contentDescription = "${data.appName} Icon",
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colorScheme.surface)
+                                        )
+                                    } ?: run {
+                                        // アイコンがない場合、デフォルトのアイコンを表示
+                                        Icon(
+                                            imageVector = Icons.Default.Apps,
+                                            contentDescription = "Default App Icon",
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colorScheme.surface)
+                                        )
+                                    }
+
+
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    Column {
+                                        Text(
+                                            text = data.appName,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = formatTime(data.totalTimeInForeground),
+                                            fontSize = 12.sp,
+                                            color = Color.DarkGray
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -132,17 +184,37 @@ fun AppUsageChart(mainUsageData: List<AppUsageData>, otherUsageData: AppUsageDat
                                         .background(colors[mainUsageData.size % colors.size])
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Column {
-                                    Text(
-                                        text = "その他",
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                ) {
+                                    // アイコンがない場合、デフォルトのアイコンを表示
+                                    Icon(
+                                        imageVector = Icons.Default.Apps,
+                                        contentDescription = "Default App Icon",
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .clip(CircleShape),
+                                        tint = Color.Transparent
                                     )
-                                    Text(
-                                        text = formatTime(data.totalTimeInForeground),
-                                        fontSize = 12.sp,
-                                        color = Color.Gray
-                                    )
+
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    Column {
+                                        Text(
+                                            text = "その他",
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Text(
+                                            text = formatTime(data.totalTimeInForeground),
+                                            fontSize = 12.sp,
+                                            color = Color.DarkGray
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -227,25 +299,55 @@ fun AppUsageChart(mainUsageData: List<AppUsageData>, otherUsageData: AppUsageDat
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(8.dp)
+                                .padding(16.dp)
                         ) {
-                            Text(
-                                text = data.packageName,
+                            Box(
                                 modifier = Modifier
-                                    .weight(0.2f)
-                                    .clickable {
-                                        selectedAppUsageData = data
-                                        showDialog = true
-                                    },
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                                    .weight(0.2f) // 横方向の割合を指定
+                                    .fillMaxHeight() // 親要素の高さに合わせる
+                            ) {
+                                // アプリアイコンを表示 (Coilライブラリを使用)
+                                data.iconUrl?.let { iconUrl ->
+                                    Image(
+                                        painter = rememberAsyncImagePainter(
+                                            ImageRequest.Builder(LocalContext.current)
+                                                .data(data = iconUrl)
+                                                .apply { crossfade(true) }
+                                                .build()
+                                        ),
+                                        contentDescription = "${data.appName} Icon",
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .size(36.dp) // サイズ指定を追加
+                                            .clip(CircleShape)
+                                            .clickable {
+                                                selectedAppUsageData = data
+                                                showDialog = true
+                                            },
+                                    )
+                                } ?: run {
+                                    // アイコンがない場合、デフォルトのアイコンを表示
+                                    Icon(
+                                        imageVector = Icons.Default.Apps,
+                                        contentDescription = "Default App Icon",
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .size(36.dp) // サイズ指定を追加
+                                            .clip(CircleShape)
+                                            .clickable {
+                                                selectedAppUsageData = data
+                                                showDialog = true
+                                            },
+                                    )
+                                }
+                            }
+
                             BarChart(
                                 value = data.totalTimeInForeground,
                                 maxValue = roundedMaxTime,
                                 modifier = Modifier
                                     .weight(0.8f)
-                                    .height(24.dp)
+                                    .height(36.dp)
                                     .clickable {
                                         selectedAppUsageData = data
                                         showDialog = true
@@ -272,12 +374,13 @@ fun AppUsageChart(mainUsageData: List<AppUsageData>, otherUsageData: AppUsageDat
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
+
                             BarChart(
                                 value = data.totalTimeInForeground,
                                 maxValue = roundedMaxTime,
                                 modifier = Modifier
                                     .weight(0.8f)
-                                    .height(24.dp)
+                                    .height(36.dp)
                                     .clickable {
                                         selectedAppUsageData = data
                                         showDialog = true
@@ -323,7 +426,7 @@ fun AppDetailDialog(
         },
         text = {
             Column {
-                Text("アプリ名 : ${appUsageData.packageName}", style = MaterialTheme.typography.bodySmall)
+                Text("アプリ名 : ${appUsageData.appName}", style = MaterialTheme.typography.bodySmall)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text("使用時間 : ${formatTime(appUsageData.totalTimeInForeground)}", style = MaterialTheme.typography.bodySmall)
             }

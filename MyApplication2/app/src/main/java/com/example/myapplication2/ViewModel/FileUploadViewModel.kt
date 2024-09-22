@@ -49,10 +49,27 @@ class FileUploadViewModel @Inject constructor(
         }
     }
 
+    // アプリアイコンのアップロード
+    fun uploadAppIconImage(uri: Uri, onSuccess: (String) -> Unit) {
+        _imageUri.value = uri
+        val storageRef = storage.reference
+        val uid = auth.currentUser?.uid
+        val imageRef = storageRef.child("app_icons/${uid}/${uri.lastPathSegment}")
+        val uploadTask = imageRef.putFile(uri)
+
+        uploadTask.addOnSuccessListener {
+            imageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                onSuccess(downloadUrl.toString()) // アップロード成功時にURLを返す
+            }
+        }.addOnFailureListener { Exception ->
+            Log.e("uploadAppIconImage", "Upload failed: ${Exception.message}")
+        }
+    }
+
     //取得したダウンロードリンクをfirebaseのドキュメントに格納する
     private fun uploadImageFirestore() {
         if (uid !== null) {
-           val userRef = db.collection("User").document(uid)
+            val userRef = db.collection("User").document(uid)
             userRef.update("profileImage",_uploadResult.value)
                 .addOnSuccessListener {
                     Log.d("uploadImageFirestore","uploadImageFirestore success")
