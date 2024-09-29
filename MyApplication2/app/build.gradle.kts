@@ -98,6 +98,7 @@ dependencies {
 
     // add new dependencies (Alice)
     implementation("com.google.accompanist:accompanist-pager:0.23.1")
+    implementation("androidx.work:work-runtime-ktx:2.7.1")
 //    implementation("androidx.compose.material3:material3-android:1.2.1")
     //Junit
     testImplementation("junit:junit:4.13.2")
