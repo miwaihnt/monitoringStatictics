@@ -15,6 +15,7 @@ import com.example.myapplication2.View2.LogInView
 import com.example.myapplication2.View2.NavGraph
 import com.example.myapplication2.View2.Profile
 import com.example.myapplication2.ViewModel.FollowData
+import com.example.myapplication2.ViewModel.scheduleDailyUpload
 import com.example.myapplication2.ui.theme.MyApplication2Theme
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
@@ -35,6 +36,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 定期タスクのスケジュールを設定
+        scheduleDailyUpload(this)
+
         val FirebaseFirestore = FirebaseFirestore.getInstance()
         UploadStatictics = UploadStatictics(FirebaseFirestore)
         userRegistration = UserRegistration(FirebaseFirestore)
