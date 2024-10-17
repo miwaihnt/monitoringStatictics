@@ -297,7 +297,7 @@ fun Home(
                 .clip(CardDefaults.shape)
                 .combinedClickable(
                     onClick = { // "StatisticsInfo"画面に遷移
-                        navController.navigate("StatisticsInfo/${user.docId}")
+                        navController.navigate("StatisticsInfo/${user.docId},${user.userName}")
                         Log.d("tapped userName", "${user.userName},${user.docId}")
                     },
                     onLongClick = { /* to selected */ }

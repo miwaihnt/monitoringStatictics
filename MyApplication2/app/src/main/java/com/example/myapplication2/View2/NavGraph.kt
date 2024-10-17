@@ -101,15 +101,16 @@ fun NavGraph() {
             ListFriendsUI()
         }
 
-        composable("StatisticsInfo/{userId}") { backStackEntry ->
+        composable("StatisticsInfo/{userId},{userName}") { backStackEntry ->
             val userId = backStackEntry.arguments?.getString("userId")
+            val userName = backStackEntry.arguments?.getString("userName")
             val viewModel: StatisticsViewModel = hiltViewModel()
             LaunchedEffect(userId) {
                 if (userId != null) {
                     viewModel.getUserStatistics(userId)
                 }
             }
-            StatisticsInfo(navController = navController, viewModel = viewModel)
+            StatisticsInfo(navController = navController, viewModel = viewModel, userName = userName)
         }
 
     }
