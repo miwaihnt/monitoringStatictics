@@ -8,9 +8,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication2.ViewModel.FileUploadViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.myapplication2.ViewModel.CurrentUserViewModel
 import com.example.myapplication2.ViewModel.FollowData
 import com.example.myapplication2.ViewModel.FollowReqUserViewModel
+import com.example.myapplication2.ViewModel.GoogleAuthViewModel
 import com.example.myapplication2.ViewModel.LoginViewModel
 import com.example.myapplication2.ViewModel.SearchUserViewModel
 import com.example.myapplication2.ViewModel.StatisticsViewModel
@@ -27,13 +30,44 @@ fun NavGraph() {
         composable("LogInView") {
             val loginViewModel = hiltViewModel<LoginViewModel>()
             val currenUserViewModel = hiltViewModel<CurrentUserViewModel>()
-            LogInView(navController = navController, loginViewModel =  loginViewModel,currentUserViewModel = currenUserViewModel)
+            val GoogleAuthViewModel = hiltViewModel<GoogleAuthViewModel>()
+            LogInView(
+                navController = navController,
+                loginViewModel =  loginViewModel,
+                currentUserViewModel = currenUserViewModel,
+                GoogleAuthViewModel = GoogleAuthViewModel
+            )
         }
+
 
         composable("UserRegistrate") {
             val UserResistrationViewModel = hiltViewModel<UserResistrationViewModel>()
             UserRegistrate(navController = navController,UserResistrationViewModel = UserResistrationViewModel)
         }
+
+        composable("linkWithEmail") {
+            val GoogleAuthViewModel = hiltViewModel<GoogleAuthViewModel>()
+
+            linkWithEmail(
+                GoogleAuthViewModel = GoogleAuthViewModel,
+                navController = navController,
+                )
+        }
+
+
+//        composable(
+//            "UserRegistrate/{uid}",
+//            arguments = listOf(navArgument("uid"){type= NavType.StringType})
+//
+//        ) { backstackEntry->
+//            val uid = backstackEntry.arguments?.getString("uid")
+//            if (uid !==null) {
+//                val UserResistrationViewModel = hiltViewModel<UserResistrationViewModel>()
+//                UserRegistrate(navController = navController,UserResistrationViewModel = UserResistrationViewModel,uid)
+//            } else {
+//                Log.e("NavGraph", "UID is null, navigating back")
+//            }
+//        }
 
         composable("profile") {
             val curretUserViewModel = hiltViewModel<CurrentUserViewModel>()

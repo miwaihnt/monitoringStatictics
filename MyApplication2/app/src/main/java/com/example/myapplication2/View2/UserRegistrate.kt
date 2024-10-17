@@ -38,7 +38,7 @@ import com.example.myapplication2.ViewModel.UserResistrationViewModel
 @Composable
 fun UserRegistrate(
     navController: NavController,
-    UserResistrationViewModel: UserResistrationViewModel = viewModel()
+    UserResistrationViewModel: UserResistrationViewModel = viewModel(),
 ) {
     var userName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -72,7 +72,6 @@ fun UserRegistrate(
                 .padding(PaddingValues)
 
         ) {
-
             TextField(
                 value = userName,
                 onValueChange = { userName = it },
@@ -122,4 +121,39 @@ fun UserRegistrate(
         )
 
     }
+
+    //SMS認証用
+
+//    if (UserResistrationViewModel.phoneDialeg.value) {
+//        AlertDialog(
+//            onDismissRequest = {
+//                UserResistrationViewModel.alertDialog.value = false
+//            },
+//            confirmButton =  {
+//                Button(onClick =
+//                { UserResistrationViewModel.alertDialog.value = false
+//
+//                })
+//            {
+//                Text(text = "OK")
+//            }
+//            },
+//            title =  {Text(text = "SMS認証")
+//            },
+//            text = {
+//                Column {
+//                    TextField(
+//                        value = UserResistrationViewModel.phoneNumber.value,
+//                        onValueChange = {UserResistrationViewModel.phoneNumber.value = it},
+//                        label = { Text("電話番号を入力してください") }
+//                    )
+//                    TextField(
+//                        value = UserResistrationViewModel.smsNumber.value,
+//                        onValueChange = {UserResistrationViewModel.smsNumber.value = it},
+//                        label = { Text("SMSを入力してください")}
+//                    )
+//                }
+//            }
+//        )
+//    }
 }

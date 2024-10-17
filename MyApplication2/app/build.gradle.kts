@@ -96,6 +96,10 @@ dependencies {
     implementation("io.coil-kt:coil-compose:1.4.0")
     implementation("androidx.test:runner:1.5.2")
 
+    //Activity Result API
+    implementation("androidx.activity:activity-ktx:1.9.2")
+
+
     // add new dependencies (Alice)
     implementation("com.google.accompanist:accompanist-pager:0.23.1")
 //    implementation("androidx.compose.material3:material3-android:1.2.1")
