@@ -37,4 +37,35 @@ class UserInfoRepository @Inject constructor(
         }
 
     }
+
+    suspend fun collectEmailPassword(UID:String):Pair<String,String>?{
+
+        val TAG = "collectEmailPassword"
+
+        return suspendCoroutine { cont ->
+            //firestoreからEmailとpasswordを取得
+            db.collection("User")
+                .document(UID)
+                .get()
+                .addOnCompleteListener { Task->
+                    if (Task.isSuccessful) {
+                        val document = Task.result
+                        val email = document.getString("email")?:""
+                        val password = document.getString("password")?:""
+                        cont.resume(Pair(email, password))
+                    } else {
+                        cont.resumeWithException(Task.exception?:Exception("Unknown error"))
+                    }
+                }.addOnFailureListener {exception ->
+                    Log.e("checkUserExsits","excepiton:${exception.message}")
+                }
+
+
+
+        }
+
+
+
+    }
+
 }

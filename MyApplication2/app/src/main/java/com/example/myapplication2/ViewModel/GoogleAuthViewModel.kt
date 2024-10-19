@@ -53,8 +53,8 @@ class GoogleAuthViewModel @Inject constructor(
             .requestEmail()
             .build()
 
-        Log.d(TAG,"signInWithGoogle called")
-        val googleSignInClient = GoogleSignIn.getClient(context,gso)
+        Log.d(TAG, "signInWithGoogle called")
+        val googleSignInClient = GoogleSignIn.getClient(context, gso)
         val signInIntent = googleSignInClient.signInIntent
 
         // Google Sign Inを開始
@@ -62,25 +62,26 @@ class GoogleAuthViewModel @Inject constructor(
     }
 
     fun firebaseAuthWithGoogle(
-        idToken:String,
+        idToken: String,
         navController: NavController,
     ) {
-        Log.d(TAG,"idToken:$idToken")
-        val credential  = GoogleAuthProvider.getCredential(idToken,null)
+        Log.d(TAG, "idToken:$idToken")
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
-            .addOnCompleteListener {task ->
-                if(task.isSuccessful){
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
                     //現在接続しているユーザのuidを取得
                     UID = auth.currentUser!!.uid
-                    Log.d(TAG,"uid:$UID")
+                    Log.d(TAG, "uid:$UID")
                     //取得したuidがfirebaseで保持しているuidと一致するか
                     viewModelScope.launch {
                         val result = repository.checkUserExsits(UID)
-                        Log.d(TAG,"result:${result}")
+                        Log.d(TAG, "result:${result}")
                         if (!result) {
                             navController.navigate("linkWithEmail")
-                            Log.d(TAG,"uid:$UID")
+                            Log.d(TAG, "uid:$UID")
                         } else {
+                            secondLinkwithEmail()
                             navController.navigate("Home")
                         }
 
@@ -91,28 +92,29 @@ class GoogleAuthViewModel @Inject constructor(
 
 
     fun linkWithEmailPassoword(
-        userName:String,
-        email:String,
-        password:String,
-        navController:NavController
+        userName: String,
+        email: String,
+        password: String,
+        navController: NavController
     ) {
         val currentUser = auth.currentUser
         //現在接続しているユーザのuidを取得
         UID = auth.currentUser!!.uid
-        Log.d(TAG,"currentUser:$currentUser")
-        Log.d(TAG,"linkwithEmail:userName$userName,email:$email,password:$password")
-        Log.d(TAG,"linkwithEmail:UID:$UID")
+        Log.d(TAG, "currentUser:$currentUser")
+        Log.d(TAG, "linkwithEmail:userName$userName,email:$email,password:$password")
+        Log.d(TAG, "linkwithEmail:UID:$UID")
         //メールリンクが作成されているかの確認
-        val isLinkmail = currentUser?.providerData?.any{it.providerId == EmailAuthProvider.PROVIDER_ID} == true
+        val isLinkmail =
+            currentUser?.providerData?.any { it.providerId == EmailAuthProvider.PROVIDER_ID } == true
 
         if (!isLinkmail) {
             //メールとパスワードを使ってクレデンシャルを作成
-            val credential = EmailAuthProvider.getCredential(email,password)
+            val credential = EmailAuthProvider.getCredential(email, password)
             //google認証とのリンク
             currentUser?.linkWithCredential(credential)
-                ?.addOnCompleteListener {task ->
+                ?.addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Log.d(TAG,"link is succesful credential:$credential")
+                        Log.d(TAG, "link is succesful credential:$credential")
 
                         val firebaseUser = hashMapOf(
                             "userName" to userName,
@@ -132,7 +134,10 @@ class GoogleAuthViewModel @Inject constructor(
                                 db.collection("User").document(UID).collection("FollowData")
                                     .add(followData)
                                     .addOnSuccessListener { subDocumentReference ->
-                                        Log.d(TAG, "Subcollection added with ID: ${subDocumentReference.id}")
+                                        Log.d(
+                                            TAG,
+                                            "Subcollection added with ID: ${subDocumentReference.id}"
+                                        )
                                         navController.navigate("Home")
                                     }
                                     .addOnFailureListener { e ->
@@ -143,11 +148,38 @@ class GoogleAuthViewModel @Inject constructor(
                                 Log.e(TAG, "Error adding document", e)
                             }
                     } else {
-                        Log.d(TAG,"link is error ${task.exception}")
+                        Log.d(TAG, "link is error ${task.exception}")
                     }
                 }
         }
 
+    }
+
+    //Email認証を実施した後に、Google認証を実施する場合、EmailLinkが途切れるので 再紐付け
+    fun secondLinkwithEmail() {
+        val currentUser = auth.currentUser
+        if (currentUser !== null) {
+            val UID = currentUser.uid
+            val isLinkmail =
+                currentUser.providerData.any { it.providerId == EmailAuthProvider.PROVIDER_ID } == true
+            if (!isLinkmail) {
+                //Emailとパスワードをfirestoreから取得
+                viewModelScope.launch {
+                    val emailPassword  = repository.collectEmailPassword(UID)
+                    emailPassword?.let { (email, password) ->
+                        //クレデンシャルの作成
+                        val credential = EmailAuthProvider.getCredential(email, password)
+                        currentUser.linkWithCredential(credential)
+                            .addOnSuccessListener {
+                                Log.d(TAG,"link is success")
+                            }.addOnFailureListener {
+                                Log.d(TAG,"Link is failed")
+                            }
+                    }
+                }
+            }
+
+        }
     }
 }
 
