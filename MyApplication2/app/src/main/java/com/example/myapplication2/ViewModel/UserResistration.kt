@@ -49,46 +49,50 @@ class UserResistrationViewModel @Inject constructor(
 
         if (userName.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
 
-            val user = auth.currentUser
-            val firebaseUser = hashMapOf(
-                "userName" to userName,
-                "email" to email,
-                "password" to password
-            )
-
-            if (user!==null) {
-                val userId = user.uid
-                Log.d(TAG, "useId:$userId")
-                if (user!==null) {
-                    db.collection("User")
-                        .document(userId)
-                        .set(firebaseUser)
-                        .addOnSuccessListener {
-                            Log.d(TAG, "userDocCreate:$userId")
-                            val followData = hashMapOf(
-                                "followers" to emptyList<String>(),
-                                "following" to emptyList<String>(),
-                                "followreqesting" to emptyList<String>()
-                            )
-                            db.collection("User").document(userId).collection("FollowData")
-                                .add(followData)
-                                .addOnSuccessListener { subDocumentReference ->
-                                    Log.d(TAG, "Subcollection added with ID: ${subDocumentReference.id}")
-                                    navController.navigate("LogInView")
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e(TAG, "Error adding subCollection,e")
-                                }
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener() { task ->
+                    if (task.isSuccessful) {
+                        val user = auth.currentUser
+                        val firebaseUser = hashMapOf(
+                            "userName" to userName,
+                            "email" to email,
+                            "password" to password
+                        )
+                        if (user!==null) {
+                            val userId = user.uid
+                            Log.d(TAG, "useId:$userId")
+                            if (user!==null) {
+                                db.collection("User")
+                                    .document(userId)
+                                    .set(firebaseUser)
+                                    .addOnSuccessListener {
+                                        Log.d(TAG, "userDocCreate:$userId")
+                                        val followData = hashMapOf(
+                                            "followers" to emptyList<String>(),
+                                            "following" to emptyList<String>(),
+                                            "followreqesting" to emptyList<String>()
+                                        )
+                                        db.collection("User").document(userId).collection("FollowData")
+                                            .add(followData)
+                                            .addOnSuccessListener { subDocumentReference ->
+                                                Log.d(TAG, "Subcollection added with ID: ${subDocumentReference.id}")
+                                                navController.navigate("LogInView")
+                                            }
+                                            .addOnFailureListener { e ->
+                                                Log.e(TAG, "Error adding subCollection,e")
+                                            }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e(TAG, "Error adding document", e)
+                                    }
+                            } else {
+                                Log.e(TAG,"user is null")
+                            }
                         }
-                        .addOnFailureListener { e ->
-                            Log.e(TAG, "Error adding document", e)
-                        }
-                } else {
-                    Log.e(TAG,"user is null")
+                    }
+                }.addOnFailureListener {exception->
+                    Log.e(TAG,"task is fail:${exception.message}")
                 }
-            }
-
-
 
         } else {
             Log.d(TAG,"input information is empty")
