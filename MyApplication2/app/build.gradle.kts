@@ -95,7 +95,7 @@ dependencies {
     implementation ("androidx.compose.material:material-icons-extended")
     implementation("io.coil-kt:coil-compose:1.4.0")
     implementation("androidx.test:runner:1.5.2")
-
+    implementation ("androidx.compose.foundation:foundation:1.1.0")
     //Activity Result API
     implementation("androidx.activity:activity-ktx:1.9.2")
 

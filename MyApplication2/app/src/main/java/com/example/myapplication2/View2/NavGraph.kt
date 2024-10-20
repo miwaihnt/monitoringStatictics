@@ -15,6 +15,7 @@ import com.example.myapplication2.ViewModel.FollowData
 import com.example.myapplication2.ViewModel.FollowReqUserViewModel
 import com.example.myapplication2.ViewModel.GoogleAuthViewModel
 import com.example.myapplication2.ViewModel.LoginViewModel
+import com.example.myapplication2.ViewModel.ResetEmailPasswordViewModel
 import com.example.myapplication2.ViewModel.SearchUserViewModel
 import com.example.myapplication2.ViewModel.StatisticsViewModel
 //import com.example.myapplication2.ViewModel.SerchBarViewModel
@@ -54,6 +55,12 @@ fun NavGraph() {
                 )
         }
 
+        composable("ResetEmailPassword") {
+            val ResetEmailPassword = hiltViewModel<ResetEmailPasswordViewModel>()
+
+
+            ResetEmailPassword(ResetEmailPassword=ResetEmailPassword,navController = navController,)
+        }
 
 //        composable(
 //            "UserRegistrate/{uid}",

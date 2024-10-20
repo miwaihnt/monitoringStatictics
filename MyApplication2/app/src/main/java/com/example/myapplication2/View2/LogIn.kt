@@ -33,8 +33,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -158,6 +162,7 @@ fun LogInView(
                 Text(text = "Login")
             }
 
+
             Button(
                 onClick = {
                     navController.navigate("UserRegistrate")
@@ -174,6 +179,12 @@ fun LogInView(
             ) {
                 Text(text = "登録")
             }
+
+
+            //パスワード再設定
+            TextWithLink(
+                onClick = {navController.navigate("ResetEmailPassword")},
+            )
 
 
             Row(
@@ -200,65 +211,23 @@ fun LogInView(
     }
 }
 
+//EmailReset用コンポーネント
+@Composable
+fun TextWithLink(
+    onClick:() ->Unit
+) {
+    Text(
+        text = buildAnnotatedString {
+            append("パスワードを忘れた方は")
+            withStyle(style = SpanStyle(color = Color.Black, textDecoration = TextDecoration.Underline)) {
+                append("こちら")
+            }
+        },
+        modifier = Modifier
+            .clickable { onClick() }
+            .padding(16.dp),
+        color = Color.Black
+    )
+}
 
-//従来のLoginView
-//{
-//
-//    val usageStatsViewModel: UsageStatsViewModel = hiltViewModel()
-//    val statisticsViewModel: UploadStatisticsViewModel = hiltViewModel()
-//    val fileUploadViewModel: FileUploadViewModel = hiltViewModel()
-//
-//
-//    var email by remember { mutableStateOf("") }
-//    var password by remember { mutableStateOf("") }
-//
-//
-//    Column(
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = Arrangement.Center
-//    ) {
-//        TextField(
-//            value = email,
-//            onValueChange = { email = it },
-//            label = { Text("Email") },
-//            modifier = Modifier.padding(16.dp)
-//        )
-//
-//        TextField(
-//            value = password,
-//            onValueChange = { password = it },
-//            label = { Text("Password") },
-//            modifier = Modifier.padding(16.dp)
-//        )
-//
-//        Button(
-//            onClick = {
-//                loginViewModel.logIn(
-//                    email,
-//                    password,
-//                    navController,
-//                    usageStatsViewModel, // UsageStatsViewModel を渡す
-//                    statisticsViewModel, // UploadStatisticsViewModel を渡す
-//                    fileUploadViewModel // FileUploadViewModel を渡す
-//                )
-//            },
-//            modifier = Modifier
-//                .padding(16.dp)
-//                .width(200.dp)
-//        ) {
-//            Text(text = "Login")
-//        }
-//        Button(
-//            onClick = {
-//                navController.navigate("UserRegistrate")
-//            },
-//            modifier = Modifier
-//                .padding(16.dp)
-//                .width(200.dp)
-//        ) {
-//            Text(text = "登録")
-//        }
-//
-//    }
-//
-//}
+
